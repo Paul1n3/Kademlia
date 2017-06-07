@@ -5,54 +5,43 @@
  */
 package kademlia.simulations;
 
-import java.io.IOException;
-import kademlia.JKademliaNode;
-import kademlia.message.SimpleMessage;
-import kademlia.message.SimpleReceiver;
-import kademlia.node.KademliaId;
-
-import java.io.IOException;
-import java.net.*;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
-import java.net.SocketException;
 import java.security.KeyManagementException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import javax.net.ssl.SSLSocket;
+import kademlia.JKademliaNode;
+import kademlia.node.KademliaId;
 
 /**
  *
  * @author Pauline
  */
-public class SSL2Simulation {
+public class ClientSansSSL {
+
     public static void main(String [] args)throws IOException, UnknownHostException,
             KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
         
-        SSLSocket socket;
+        Socket socket;
         BufferedReader reader = null;
        try
         {
-            JKademliaNode kadClient = new JKademliaNode("Chocolat", new KademliaId("12345678901234567890"), 7545);
+            //JKademliaNode kadClient = new JKademliaNode("Chocolat", new KademliaId("12345678901234567890"), 7545);
             //JKademliaNode kad2 = new JKademliaNode("Sucre", new KademliaId("12345678901234567891"), 7513);
             
             //kad1.getServer().sendMessage(kad2.getNode(), new SimpleMessage("Some Message"), new SimpleReceiver());
             
-            File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat");
-            InputStream targetStream = new FileInputStream(initialFile);
-            socket = SSLSocketKeystoreFactory.getSocketWithCert(InetAddress.getLocalHost(), 1234, targetStream, "cookie");
+       
+            socket = new Socket(InetAddress.getLocalHost(), 1234);
             System.out.println("Tentative de connection");
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             System.out.println(reader.readLine());
@@ -64,5 +53,6 @@ public class SSL2Simulation {
             e.printStackTrace();
         } 
     }
+
+      
 }
-    
