@@ -4,25 +4,20 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/SaveStateTest2.java</file>
-            <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/ClientSansSSL.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/SSLSocketKeystoreFactory.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/operation/ConnectOperation.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/message/NodeLookupReceiver.java</file>
-            <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/message/AcknowledgeMessage.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/SSLServerSocketKeystoreFactory.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/SSL2Simulation.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/NodeConnectionTest.java</file>
-            <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/ContentUpdatingTest.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/Simulation.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/RefreshOperationTest.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/SimpleMessageTest.java</file>
-            <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/RoutingTableStateTesting.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/ContentSendingTest.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/node/KademliaId.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/RoutingTableSimulation.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/SaveStateTest.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/node/Node.java</file>
-            <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/SSL1Simulation.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/simulations/DHTContentImpl.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/message/NodeLookupMessage.java</file>
             <file>file:/Users/Pauline/Desktop/Kademlia/src/kademlia/message/ContentMessage.java</file>

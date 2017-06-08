@@ -5,27 +5,27 @@
  */
 package kademlia.simulations;
 
-import java.io.IOException;
+//import java.io.IOException;
 import kademlia.JKademliaNode;
-import kademlia.message.SimpleMessage;
-import kademlia.message.SimpleReceiver;
+//import kademlia.message.SimpleMessage;
+//import kademlia.message.SimpleReceiver;
 import kademlia.node.KademliaId;
 
-import java.io.IOException;
+//import java.io.IOException;
 import java.net.*;
-import javax.net.ssl.SSLSession;
+//import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLServerSocket;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
+//import java.io.BufferedInputStream;
+//import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
+//import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.security.KeyManagementException;
-import java.security.KeyStore;
+//import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -48,6 +48,7 @@ public class SSL1Simulation {
         try
         {
             JKademliaNode kad1 = new JKademliaNode(nom, new KademliaId("12345678901234567890"), port);
+            System.out.println("Je suis le noeud avec le port " + kad1.getPort());
             File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroCle);
             InputStream targetStream = new FileInputStream(initialFile);
             ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert((port + 2), targetStream, motDePasse);
@@ -105,6 +106,7 @@ class Boucle_Serveur implements Runnable {
       try
       {
           while(true){
+              System.out.println("Je suis en attente de clients.");
               socket= ssocket.accept();
               System.out.println("Connexion cliente reçue.");
               Thread t = new Thread(new Accepter_clients(socket));
