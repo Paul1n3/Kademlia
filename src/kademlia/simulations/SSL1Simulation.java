@@ -40,49 +40,39 @@ public class SSL1Simulation {
     public static void main(String[] args) throws IOException,
         KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException{
         SSLServerSocket ssocket;
-        //SSLServerSocket ssocket2;
-        int port = 4789;
-   
+        int port = Integer.parseInt(args[0]);
+        String nom = args[1];
+        String numeroCle = args[2];
+        String motDePasse = args[3];
         
         try
         {
-            //JKademliaNode kad1 = new JKademliaNode("Farine", new KademliaId("12345678901234567890"), 7545);
+            JKademliaNode kad1 = new JKademliaNode(nom, new KademliaId("12345678901234567890"), port);
+            File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroCle);
+            InputStream targetStream = new FileInputStream(initialFile);
+            ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert((port + 2), targetStream, motDePasse);
             //JKademliaNode kad2 = new JKademliaNode("Sucre", new KademliaId("12345678901234567891"), 7572);
-            //while(true){
-               
-                File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE");
-                InputStream targetStream = new FileInputStream(initialFile);
-                ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert(1234, targetStream, "chocolat");
-                Thread t = new Thread(new Accepter_clients(ssocket));
-                t.start();
-                System.out.println("Le premier client a été traité !");
-
-                //File deuxiemeFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE");
-                //InputStream targetStream2 = new FileInputStream(deuxiemeFile);
-                //ssocket2 = SSLServerSocketKeystoreFactory.getServerSocketWithCert(2022, targetStream2, "chocolat");
-
-                //Thread t2 = new Thread(new Accepter_clients(ssocket2));
-                //t2.start();
-                //System.out.println("Le deuxième client a été traité");
-
-                //kad1.getServer().sendMessage(kad2.getNode(), new SimpleMessage("Some Message"), new SimpleReceiver());
-            }
-        //}
+            //kad1.getServer().sendMessage(kad2.getNode(), new SimpleMessage("Some Message"), new SimpleReceiver());
+            Thread serveur = new Thread(new Boucle_Serveur(ssocket));
+            serveur.start();
+            System.out.println("Je peux commencer à appeler les serveurs");
+        }
         catch (IOException e)
         {
             e.printStackTrace();
         }
     }
+    
+    
 }
 
 class Accepter_clients implements Runnable {
 
-  private SSLServerSocket socketserver;
   private Socket socket;
  
 
-  public Accepter_clients(SSLServerSocket s){
-    socketserver = s;
+  public Accepter_clients(Socket s){
+    socket = s;
   }
         
   @Override
@@ -90,7 +80,6 @@ class Accepter_clients implements Runnable {
 
     try {
         PrintWriter writer;
-        socket = socketserver.accept(); // Un client se connecte on l'accepte
         writer = new PrintWriter(socket.getOutputStream(), true);
         writer.println("Message1");
         System.out.println("Un nouveau client s'est connecté !");
@@ -102,3 +91,29 @@ class Accepter_clients implements Runnable {
   }
 
 }
+
+class Boucle_Serveur implements Runnable {
+ 
+    SSLServerSocket ssocket;
+    public Boucle_Serveur(SSLServerSocket s){
+        ssocket = s;
+    }
+
+    @Override
+    public void run() {
+      Socket socket;
+      try
+      {
+          while(true){
+              socket= ssocket.accept();
+              System.out.println("Connexion cliente reçue.");
+              Thread t = new Thread(new Accepter_clients(socket));
+              t.start();
+          }
+      }catch (IOException e)
+      {
+          e.printStackTrace();
+      }
+    }
+}
+

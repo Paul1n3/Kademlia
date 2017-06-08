@@ -43,16 +43,21 @@ public class SSL2Simulation {
         
         SSLSocket socket;
         BufferedReader reader = null;
-       try
+        
+        int port = Integer.parseInt(args[0]);
+        String nom = args[1];
+        String numeroCertificat = args[2];
+        String motDePasse = args[3];    
+        try
         {
-            JKademliaNode kadClient = new JKademliaNode("Chocolat", new KademliaId("12345678901234567890"), 7545);
+            JKademliaNode kadClient = new JKademliaNode(nom, new KademliaId("12345678901234567890"), 7545);
             //JKademliaNode kad2 = new JKademliaNode("Sucre", new KademliaId("12345678901234567891"), 7513);
             
             //kad1.getServer().sendMessage(kad2.getNode(), new SimpleMessage("Some Message"), new SimpleReceiver());
             
-            File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat");
+            File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat" + numeroCertificat);
             InputStream targetStream = new FileInputStream(initialFile);
-            socket = SSLSocketKeystoreFactory.getSocketWithCert(InetAddress.getLocalHost(), 1234, targetStream, "cookie");
+            socket = SSLSocketKeystoreFactory.getSocketWithCert(InetAddress.getLocalHost(), port, targetStream, motDePasse);
             System.out.println("Tentative de connection");
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             System.out.println(reader.readLine());
