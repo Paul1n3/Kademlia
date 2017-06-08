@@ -36,7 +36,7 @@ public class ContentSendingTest
             {
                 data += UUID.randomUUID();
             }
-            System.out.println(data);
+            System.out.println("data : " + data);
             DHTContentImpl c = new DHTContentImpl(kad2.getOwnerId(), data);
             kad2.put(c);
 

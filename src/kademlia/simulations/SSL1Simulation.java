@@ -44,16 +44,15 @@ public class SSL1Simulation {
         String nom = args[1];
         String numeroCle = args[2];
         String motDePasse = args[3];
+        int numeroNoeudLance = Integer.parseInt(args[4]);
         
         try
         {
             JKademliaNode kad1 = new JKademliaNode(nom, new KademliaId("12345678901234567890"), port);
-            System.out.println("Je suis le noeud avec le port " + kad1.getPort());
+            System.out.println("Je suis le noeud "+ kad1.getNode().getNodeId() +" avec le port " + kad1.getPort());
             File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroCle);
             InputStream targetStream = new FileInputStream(initialFile);
             ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert((port + 2), targetStream, motDePasse);
-            //JKademliaNode kad2 = new JKademliaNode("Sucre", new KademliaId("12345678901234567891"), 7572);
-            //kad1.getServer().sendMessage(kad2.getNode(), new SimpleMessage("Some Message"), new SimpleReceiver());
             Thread serveur = new Thread(new Boucle_Serveur(ssocket));
             serveur.start();
             System.out.println("Je peux commencer à appeler les serveurs");
