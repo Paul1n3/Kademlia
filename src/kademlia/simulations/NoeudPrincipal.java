@@ -36,15 +36,15 @@ import java.security.cert.CertificateException;
  *
  * @author Pauline
  */
-public class SSL1Simulation {
+public class NoeudPrincipal {
     public static void main(String[] args) throws IOException,
         KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException{
         SSLServerSocket ssocket;
-        int port = Integer.parseInt(args[0]);
-        String nom = args[1];
-        String numeroCle = args[2];
-        String motDePasse = args[3];
-        int numeroNoeudLance = Integer.parseInt(args[4]);
+        int port = 1111;
+        String nom = "principal";
+        String numeroCle = "0";
+        String motDePasse = "gateau";
+        int numeroNoeudLance = 0;
         
         try
         {
@@ -62,59 +62,6 @@ public class SSL1Simulation {
             e.printStackTrace();
         }
     }
-    
-    
-}
-
-class Accepter_clients implements Runnable {
-
-  private Socket socket;
- 
-
-  public Accepter_clients(Socket s){
-    socket = s;
-  }
-        
-  @Override
-  public void run() {
-
-    try {
-        PrintWriter writer;
-        writer = new PrintWriter(socket.getOutputStream(), true);
-        writer.println("Message1");
-        System.out.println("Un nouveau client s'est connecté !");
-
-        socket.close();
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-  }
-
-}
-
-class Boucle_Serveur implements Runnable {
- 
-    SSLServerSocket ssocket;
-    public Boucle_Serveur(SSLServerSocket s){
-        ssocket = s;
-    }
-
-    @Override
-    public void run() {
-      Socket socket;
-      try
-      {
-        while(true){
-            System.out.println("Je suis en attente de clients.");
-            socket= ssocket.accept();
-            System.out.println("Connexion cliente reçue.");
-            Thread t = new Thread(new Accepter_clients(socket));
-            t.start();
-        }
-        }catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
+       
 }
 
