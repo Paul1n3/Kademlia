@@ -55,7 +55,7 @@ public class NoeudPrincipal {
             File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroCle);
             InputStream targetStream = new FileInputStream(initialFile);
             ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert((port + 2), targetStream, motDePasse);
-            Thread serveur = new Thread(new Boucle_Serveur(ssocket));
+            Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance));
             serveur.start();
             System.out.println("Je peux commencer à appeler les serveurs");
         }

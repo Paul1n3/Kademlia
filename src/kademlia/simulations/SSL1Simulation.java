@@ -63,7 +63,7 @@ public class SSL1Simulation {
             File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroCle);
             InputStream targetStream = new FileInputStream(initialFile);
             ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert((port + 2), targetStream, motDePasse);
-            Thread serveur = new Thread(new Boucle_Serveur(ssocket));
+            Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance));
             serveur.start();
             System.out.println("Je peux commencer à appeler les serveurs");
             Init_Reseau.initialisation(infos, certificatsPublics);
@@ -80,20 +80,32 @@ public class SSL1Simulation {
 class Accepter_clients implements Runnable {
 
   private Socket socket;
- 
+  int numeroNoeud;
 
-  public Accepter_clients(Socket s){
+  public Accepter_clients(Socket s, int noeud){
     socket = s;
+    numeroNoeud = noeud;
   }
         
   @Override
   public void run() {
+      BufferedReader reader;
+      String messageRecu;
 
     try {
-        PrintWriter writer;
-        writer = new PrintWriter(socket.getOutputStream(), true);
-        writer.println("Je suis bien vivant!");
-        System.out.println("Un nouveau client s'est connecté !");
+        reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        messageRecu = reader.readLine();
+        System.out.println(messageRecu);
+        if(messageRecu.equals("PING")){
+            PrintWriter writer;
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            writer.println("Je suis le noeud " + numeroNoeud + " et je suis bien vivant!");
+            System.out.println("Un nouveau client s'est connecté !");
+        }else{
+            PrintWriter writer;
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            writer.println("Communication avec le noeud " + numeroNoeud);
+        }
 
         socket.close();
     } catch (IOException e) {
@@ -106,8 +118,10 @@ class Accepter_clients implements Runnable {
 class Boucle_Serveur implements Runnable {
  
     SSLServerSocket ssocket;
-    public Boucle_Serveur(SSLServerSocket s){
+    int noeud;
+    public Boucle_Serveur(SSLServerSocket s, int numeroNoeud){
         ssocket = s;
+        noeud = numeroNoeud;
     }
 
     @Override
@@ -119,7 +133,7 @@ class Boucle_Serveur implements Runnable {
             System.out.println("Je suis en attente de clients.");
             socket= ssocket.accept();
             System.out.println("Connexion cliente reçue.");
-            Thread t = new Thread(new Accepter_clients(socket));
+            Thread t = new Thread(new Accepter_clients(socket, noeud));
             t.start();
         }
         }catch (IOException e)

@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
@@ -51,11 +52,16 @@ public class Init_Reseau {
                 motDePasse = certificatsPublics[numeroNoeud];
                 System.out.println("Le mot de passe est " + motDePasse);
                 
+                
+                
                 File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat" + numeroNoeud);
                 InputStream targetStream = new FileInputStream(initialFile);
                 System.out.println("Tentative de connection");
                 socket = SSLSocketKeystoreFactory.getSocketWithCert(addr, numeroPort, targetStream, motDePasse);
                 System.out.println("Connection établie");
+                PrintWriter writer;
+                writer = new PrintWriter(socket.getOutputStream(), true);
+                writer.println("PING");
                 reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 System.out.println(reader.readLine());
                 socket.close();
