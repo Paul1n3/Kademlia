@@ -45,6 +45,8 @@ public class NoeudPrincipal {
         String numeroCle = "0";
         String motDePasse = "gateau";
         int numeroNoeudLance = 0;
+        int [][] noeuds = new int [2][4];
+        String certificatsPublics [][] = new String [3][4];
         
         try
         {

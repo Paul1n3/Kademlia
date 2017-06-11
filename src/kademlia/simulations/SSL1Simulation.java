@@ -6,6 +6,7 @@
 package kademlia.simulations;
 
 //import java.io.IOException;
+import java.io.BufferedReader;
 import kademlia.JKademliaNode;
 //import kademlia.message.SimpleMessage;
 //import kademlia.message.SimpleReceiver;
@@ -22,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 //import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import java.security.KeyManagementException;
@@ -30,6 +32,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import javax.net.ssl.SSLSocket;
 
 
 /**
@@ -45,6 +48,13 @@ public class SSL1Simulation {
         String numeroCle = args[2];
         String motDePasse = args[3];
         int numeroNoeudLance = Integer.parseInt(args[4]);
+        int [][] noeuds = new int [3][5];
+        
+        // Données initiales sous forme numNoeud:@IP:numPort
+        String delims = "[:]";
+        String[] infos = args[5].split(delims);
+        
+        String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro"};
         
         try
         {
@@ -56,6 +66,7 @@ public class SSL1Simulation {
             Thread serveur = new Thread(new Boucle_Serveur(ssocket));
             serveur.start();
             System.out.println("Je peux commencer à appeler les serveurs");
+            Init_Reseau.initialisation(infos, certificatsPublics);
         }
         catch (IOException e)
         {
@@ -81,7 +92,7 @@ class Accepter_clients implements Runnable {
     try {
         PrintWriter writer;
         writer = new PrintWriter(socket.getOutputStream(), true);
-        writer.println("Message1");
+        writer.println("Je suis bien vivant!");
         System.out.println("Un nouveau client s'est connecté !");
 
         socket.close();

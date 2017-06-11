@@ -58,7 +58,7 @@ public class SSL2Simulation {
             File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat0");
             InputStream targetStream = new FileInputStream(initialFile);
             System.out.println("Tentative de connection");
-            socket = SSLSocketKeystoreFactory.getSocketWithCert(InetAddress.getLocalHost(), 1236, targetStream, motDePasse);
+            socket = SSLSocketKeystoreFactory.getSocketWithCert(InetAddress.getLocalHost(), 1111, targetStream, motDePasse);
             System.out.println("Connection établie");
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             System.out.println(reader.readLine());
