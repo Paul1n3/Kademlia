@@ -25,6 +25,16 @@ import javax.net.ssl.SSLSocket;
  * @author Pauline
  */
 public class Init_Reseau {
+    
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
         
     public static void initialisation(String [] infos, String [] certificatsPublics) throws IOException, UnknownHostException,
             KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
@@ -41,16 +51,16 @@ public class Init_Reseau {
         {
             while(compteur < infos.length){
                 numeroNoeud = Integer.parseInt(infos[compteur]);
-                System.out.println("Je veux communiquer avec le noeud " + numeroNoeud);
+                System.out.println(ANSI_RED + "Je veux communiquer avec le noeud " + numeroNoeud + ANSI_RESET);
                 compteur++;
                 addr = InetAddress.getByName(infos[compteur]);
-                System.out.println("Son adresse IP est " + addr);
+                System.out.println(ANSI_RED + "Son adresse IP est " + addr + ANSI_RESET);
                 compteur++;
                 numeroPort = Integer.parseInt(infos[compteur]) + 2;
-                System.out.println("Son numéro de port est " + numeroPort);
+                System.out.println(ANSI_RED + "Son numéro de port est " + numeroPort + ANSI_RESET);
                 compteur++;
                 motDePasse = certificatsPublics[numeroNoeud];
-                System.out.println("Le mot de passe est " + motDePasse);
+                System.out.println(ANSI_RED + "Le mot de passe est " + motDePasse + ANSI_RESET);
                 
                 
                 
