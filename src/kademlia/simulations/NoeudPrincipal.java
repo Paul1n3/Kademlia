@@ -49,16 +49,19 @@ public class NoeudPrincipal {
         String motDePasse = "gateau";
         int numeroNoeudLance = 0;
         int [][] noeuds = new int [2][4];
-        String certificatsPublics [][] = new String [3][4];
+        String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro"};
+        int [] ports = {0,0,0,0,0};
+        InetAddress [] adresses = new InetAddress [5];
+        
         
         try
         {
-            JKademliaNode kad1 = new JKademliaNode(nom, new KademliaId("1234567890123456789" + numeroNoeudLance), port);
-            System.out.println(ANSI_PURPLE + "Je suis le noeud "+ kad1.getNode().getNodeId() +" avec le port " + kad1.getPort() + ANSI_RESET);
+            //JKademliaNode kad1 = new JKademliaNode(nom, new KademliaId("1234567890123456789" + numeroNoeudLance), port);
+            //System.out.println(ANSI_PURPLE + "Je suis le noeud "+ kad1.getNode().getNodeId() +" avec le port " + kad1.getPort() + ANSI_RESET);
             File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroCle);
             InputStream targetStream = new FileInputStream(initialFile);
-            ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert((port + 2), targetStream, motDePasse);
-            Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance));
+            ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert(port, targetStream, motDePasse);
+            Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance, ports, adresses));
             serveur.start();
             System.out.println(ANSI_PURPLE + "Je peux commencer à appeler les serveurs" + ANSI_RESET);
         }
@@ -69,4 +72,6 @@ public class NoeudPrincipal {
     }
        
 }
+
+
 

@@ -36,7 +36,7 @@ public class Init_Reseau {
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
         
-    public static void initialisation(String [] infos, String [] certificatsPublics) throws IOException, UnknownHostException,
+    public static void initialisation(String [] infos, String [] certificatsPublics, int [] ports, InetAddress [] adresses, int port, InetAddress adresse, int noMonNoeud) throws IOException, UnknownHostException,
             KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
         int compteur = 0;
         SSLSocket socket;
@@ -45,6 +45,7 @@ public class Init_Reseau {
         int numeroNoeud;
         int numeroPort;
         InetAddress addr;
+        String reponse;
         
         
         try
@@ -56,7 +57,7 @@ public class Init_Reseau {
                 addr = InetAddress.getByName(infos[compteur]);
                 System.out.println(ANSI_BLUE + "Son adresse IP est " + addr + ANSI_RESET);
                 compteur++;
-                numeroPort = Integer.parseInt(infos[compteur]) + 2;
+                numeroPort = Integer.parseInt(infos[compteur]);
                 System.out.println(ANSI_BLUE + "Son numéro de port est " + numeroPort + ANSI_RESET);
                 compteur++;
                 motDePasse = certificatsPublics[numeroNoeud];
@@ -69,11 +70,23 @@ public class Init_Reseau {
                 System.out.println(ANSI_BLUE + "Tentative de connection" + ANSI_RESET);
                 socket = SSLSocketKeystoreFactory.getSocketWithCert(addr, numeroPort, targetStream, motDePasse);
                 System.out.println(ANSI_GREEN + "Connection établie" + ANSI_RESET);
+                
                 PrintWriter writer;
                 writer = new PrintWriter(socket.getOutputStream(), true);
-                writer.println("PING");
+                writer.println("PING:" + noMonNoeud + ":" + port + ":" + "127.0.0.1");
+                
                 reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                System.out.println(ANSI_GREEN + reader.readLine() + ANSI_RESET);
+                reponse = reader.readLine();
+                System.out.println(ANSI_BLUE + reponse + ANSI_RESET);
+                
+                String delims = "[:]";
+                String[] reping = reponse.split(delims);
+                //Si on a le message de celui à qui on a envoyé
+                if(reping[0].equals("REPING") && reping[1].equals(Integer.toString(numeroNoeud))){
+                    System.out.println(ANSI_GREEN + "Le REPING vient bien de la bonne personne, je l'ajoute dans ma table" + ANSI_RESET);
+                    ports[numeroNoeud] = numeroPort;
+                    adresses[numeroNoeud] = addr;
+                }
                 socket.close();
             }
         }
