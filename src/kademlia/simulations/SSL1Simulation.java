@@ -33,18 +33,23 @@ public class SSL1Simulation {
     public static final String ANSI_PURPLE = "\u001B[35m";
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_RESET = "\u001B[0m";
+    
+    // Tables de connaissance du réseau
     public static int [] ports = {0,0,0,0,0};
     public static InetAddress [] adresses = new InetAddress [5];
     
     public static void main(String[] args) throws IOException,
         KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException{
+        
         SSLServerSocket ssocket;
         int port = Integer.parseInt(args[0]);
+        
+        // Mot de passe de la clé privée
         String motDePasse = args[1];
         int numeroNoeudLance = Integer.parseInt(args[2]);
         InetAddress adresse = InetAddress.getLocalHost();
         
-        // Données initiales sous forme numNoeud:@IP:numPort
+        // Connaissances initiales sous forme numNoeud:@IP:numPort
         String delims = "[:]";
         String[] infos = args[3].split(delims);
         
@@ -52,15 +57,20 @@ public class SSL1Simulation {
         
         try
         {
+            // Ouverture de la socket sécurisée serveur
             File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroNoeudLance);
             InputStream targetStream = new FileInputStream(initialFile);
             ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert(port, targetStream, motDePasse);
+            
             Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance, ports, adresses));
             serveur.start();
+            
             System.out.println(ANSI_PURPLE + "Je peux commencer à appeler les serveurs" + ANSI_RESET);
+            
             Init_Reseau.initialisation(infos, certificatsPublics, ports, adresses, port, adresse, numeroNoeudLance);
             System.out.println(ANSI_PURPLE + "Je connais maintenant mon réseau!" + ANSI_RESET);
             afficheTab(ports);
+            
             Decouverte_Noeuds.discovery(certificatsPublics, ports, adresses, port, adresse, numeroNoeudLance);
             //Faire envois de messages random
             
@@ -116,28 +126,34 @@ class Accepter_clients implements Runnable {
         String messageRecu;
 
     try {
+        // Réception du message client
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         messageRecu = reader.readLine();
         System.out.println(messageRecu);
         String delims = "[:]";
         String[] message = messageRecu.split(delims);
+        
         if(message[0].equals("PING")){
             PrintWriter writer;
             writer = new PrintWriter(socket.getOutputStream(), true);
             writer.println("REPING:" + numeroNoeud);
             System.out.println(ANSI_CYAN + "Un nouveau client s'est connecté !" + ANSI_RESET);
             
+            // Ajout aux tables de connaissance d'un noeud non connu
             if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
                 System.out.println(ANSI_CYAN + "J'ai reçu un ping d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
                 SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
                 SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
             }
         }else if(message[0].equals("DISCOVER")){
+            // Ajout aux tables de connaissance d'un noeud non connu
             if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
                 System.out.println(ANSI_CYAN + "J'ai reçu un discover d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
                 SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
                 SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
             }
+            
+            //Envoi des noeuds connus par le serveur sous forme noNoeud:Port:Adresse
             PrintWriter writer;
             writer = new PrintWriter(socket.getOutputStream(), true);
             String reponse = "";
@@ -212,6 +228,7 @@ class Boucle_Serveur implements Runnable {
       try
       {
         while(true){
+            // Ecoute sur le port principal pour entendre les demandes de connexion et les gérer
             System.out.println(ANSI_CYAN + "Je suis en attente de clients." + ANSI_RESET);
             socket= ssocket.accept();
             System.out.println(ANSI_CYAN + "Connexion cliente reçue." + ANSI_RESET);

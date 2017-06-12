@@ -33,21 +33,27 @@ public class NoeudPrincipal {
     
     public static void main(String[] args) throws IOException,
         KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException{
+        
         SSLServerSocket ssocket;
         int port = 1111;
+        
+        // Mot de passe de la clé privée
         String motDePasse = "gateau";
         int numeroNoeudLance = 0;
         String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro"};
+        
+        // Tables de connaissance du réseau
         int [] ports = {0,0,0,0,0};
         InetAddress [] adresses = new InetAddress [5];
         
         
         try
         {
-            
+            // Ouverture de la socket sécurisée serveur
             File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroNoeudLance);
             InputStream targetStream = new FileInputStream(initialFile);
             ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert(port, targetStream, motDePasse);
+            
             Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance, ports, adresses));
             serveur.start();
             System.out.println(ANSI_PURPLE + "Je peux commencer à appeler les serveurs" + ANSI_RESET);

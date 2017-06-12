@@ -43,16 +43,24 @@ public class Decouverte_Noeuds {
         
         try
         {
+            // On parcours les noeuds qu'on connait dans le réseau pour leur demander de nous
+            // aider dans la découverte du réseau
             for(int i = 0; i < ports.length; i++){
                 if(ports[i] != 0 && i != noMonNoeud){
+                    
+                    // Tentative de connexion au noeud de manière sécurisée
                     File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat" + i);
                     InputStream targetStream = new FileInputStream(initialFile);
-                    System.out.println(ANSI_BLUE + "Envoi de decouverte de nouveaux noeuds au noeud " + i + ANSI_RESET);
+                    System.out.println(ANSI_BLUE + "Tentative d'envoi de decouverte de nouveaux noeuds au noeud " + i + ANSI_RESET);
                     socket = SSLSocketKeystoreFactory.getSocketWithCert(adresses[i], ports[i], targetStream, certificatsPublics[i]);
                     System.out.println(ANSI_GREEN + "Connection établie avec le noeud " + i + ANSI_RESET);
+                    
+                    // Envoi du message DISCOVER
                     PrintWriter writer;
                     writer = new PrintWriter(socket.getOutputStream(), true);
                     writer.println("DISCOVER:" + noMonNoeud + ":" + port + ":" + "127.0.0.1");
+                    
+                    // Réceptiond de la réponse du DISCOVER
                     reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     String reponse = reader.readLine();
                     System.out.println(ANSI_GREEN + reponse + ANSI_RESET);
@@ -75,7 +83,8 @@ public class Decouverte_Noeuds {
                             address = InetAddress.getByName(nouveautes[compteur]);
                             System.out.println(ANSI_BLUE + "Son adresse IP est " + address + ANSI_RESET);
                             compteur++;
-
+                            
+                            // Si on ne connaît pas le noeud, on le rajoute dans notre connaissance du réseau
                             if(SSL1Simulation.ports[numeroNoeud]== 0){
                                 System.out.println(ANSI_BLUE + "J'ai des nouveautés sur le noeud " + numeroNoeud + " : je le rajoute !" + ANSI_RESET);
                                 SSL1Simulation.ports[numeroNoeud] = numeroPort;
@@ -85,8 +94,6 @@ public class Decouverte_Noeuds {
                             }
                         }
                     }
-                    
-                    
                     socket.close();
                 }
             }

@@ -38,10 +38,11 @@ public class Init_Reseau {
         
     public static void initialisation(String [] infos, String [] certificatsPublics, int [] ports, InetAddress [] adresses, int port, InetAddress adresse, int noMonNoeud) throws IOException, UnknownHostException,
             KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
+        
         int compteur = 0;
         SSLSocket socket;
         BufferedReader reader;
-        String motDePasse = "gateau";
+        String motDePasse = "";
         int numeroNoeud;
         int numeroPort;
         InetAddress addr;
@@ -51,6 +52,7 @@ public class Init_Reseau {
         try
         {
             while(compteur < infos.length){
+                // On récupère les numéros de port et adresse de chaque noeud
                 numeroNoeud = Integer.parseInt(infos[compteur]);
                 System.out.println(ANSI_BLUE + "Je veux communiquer avec le noeud " + numeroNoeud + ANSI_RESET);
                 compteur++;
@@ -64,13 +66,14 @@ public class Init_Reseau {
                 System.out.println(ANSI_BLUE + "Le mot de passe est " + motDePasse + ANSI_RESET);
                 
                 
-                
+                // On essaie de se connecter de façon sécurisée
                 File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat" + numeroNoeud);
                 InputStream targetStream = new FileInputStream(initialFile);
                 System.out.println(ANSI_BLUE + "Tentative de connection" + ANSI_RESET);
                 socket = SSLSocketKeystoreFactory.getSocketWithCert(addr, numeroPort, targetStream, motDePasse);
                 System.out.println(ANSI_GREEN + "Connection établie" + ANSI_RESET);
                 
+                // Envoi d'un PING au nouveau noeud connu pour vérifier son existance
                 PrintWriter writer;
                 writer = new PrintWriter(socket.getOutputStream(), true);
                 writer.println("PING:" + noMonNoeud + ":" + port + ":" + "127.0.0.1");
@@ -81,9 +84,10 @@ public class Init_Reseau {
                 
                 String delims = "[:]";
                 String[] reping = reponse.split(delims);
-                //Si on a le message de celui à qui on a envoyé
+                // On vérifie si le message renvoyé provient bien de la bonne personne
                 if(reping[0].equals("REPING") && reping[1].equals(Integer.toString(numeroNoeud))){
                     System.out.println(ANSI_GREEN + "Le REPING vient bien de la bonne personne, je l'ajoute dans ma table" + ANSI_RESET);
+                    // On ajoute ce noeud dans notre connaissance du réseau
                     ports[numeroNoeud] = numeroPort;
                     adresses[numeroNoeud] = addr;
                 }
