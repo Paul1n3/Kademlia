@@ -51,29 +51,29 @@ public class Init_Reseau {
         {
             while(compteur < infos.length){
                 numeroNoeud = Integer.parseInt(infos[compteur]);
-                System.out.println(ANSI_RED + "Je veux communiquer avec le noeud " + numeroNoeud + ANSI_RESET);
+                System.out.println(ANSI_BLUE + "Je veux communiquer avec le noeud " + numeroNoeud + ANSI_RESET);
                 compteur++;
                 addr = InetAddress.getByName(infos[compteur]);
-                System.out.println(ANSI_RED + "Son adresse IP est " + addr + ANSI_RESET);
+                System.out.println(ANSI_BLUE + "Son adresse IP est " + addr + ANSI_RESET);
                 compteur++;
                 numeroPort = Integer.parseInt(infos[compteur]) + 2;
-                System.out.println(ANSI_RED + "Son numéro de port est " + numeroPort + ANSI_RESET);
+                System.out.println(ANSI_BLUE + "Son numéro de port est " + numeroPort + ANSI_RESET);
                 compteur++;
                 motDePasse = certificatsPublics[numeroNoeud];
-                System.out.println(ANSI_RED + "Le mot de passe est " + motDePasse + ANSI_RESET);
+                System.out.println(ANSI_BLUE + "Le mot de passe est " + motDePasse + ANSI_RESET);
                 
                 
                 
                 File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat" + numeroNoeud);
                 InputStream targetStream = new FileInputStream(initialFile);
-                System.out.println("Tentative de connection");
+                System.out.println(ANSI_BLUE + "Tentative de connection" + ANSI_RESET);
                 socket = SSLSocketKeystoreFactory.getSocketWithCert(addr, numeroPort, targetStream, motDePasse);
-                System.out.println("Connection établie");
+                System.out.println(ANSI_GREEN + "Connection établie" + ANSI_RESET);
                 PrintWriter writer;
                 writer = new PrintWriter(socket.getOutputStream(), true);
                 writer.println("PING");
                 reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                System.out.println(reader.readLine());
+                System.out.println(ANSI_GREEN + reader.readLine() + ANSI_RESET);
                 socket.close();
             }
         }

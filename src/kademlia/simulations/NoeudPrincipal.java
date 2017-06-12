@@ -37,6 +37,9 @@ import java.security.cert.CertificateException;
  * @author Pauline
  */
 public class NoeudPrincipal {
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_RESET = "\u001B[0m";
+    
     public static void main(String[] args) throws IOException,
         KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException{
         SSLServerSocket ssocket;
@@ -51,13 +54,13 @@ public class NoeudPrincipal {
         try
         {
             JKademliaNode kad1 = new JKademliaNode(nom, new KademliaId("1234567890123456789" + numeroNoeudLance), port);
-            System.out.println("Je suis le noeud "+ kad1.getNode().getNodeId() +" avec le port " + kad1.getPort());
+            System.out.println(ANSI_PURPLE + "Je suis le noeud "+ kad1.getNode().getNodeId() +" avec le port " + kad1.getPort() + ANSI_RESET);
             File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroCle);
             InputStream targetStream = new FileInputStream(initialFile);
             ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert((port + 2), targetStream, motDePasse);
             Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance));
             serveur.start();
-            System.out.println("Je peux commencer à appeler les serveurs");
+            System.out.println(ANSI_PURPLE + "Je peux commencer à appeler les serveurs" + ANSI_RESET);
         }
         catch (IOException e)
         {

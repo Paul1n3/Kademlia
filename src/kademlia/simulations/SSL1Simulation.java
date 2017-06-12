@@ -40,6 +40,10 @@ import javax.net.ssl.SSLSocket;
  * @author Pauline
  */
 public class SSL1Simulation {
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_RESET = "\u001B[0m";
+    
     public static void main(String[] args) throws IOException,
         KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException{
         SSLServerSocket ssocket;
@@ -59,13 +63,13 @@ public class SSL1Simulation {
         try
         {
             JKademliaNode kad1 = new JKademliaNode(nom, new KademliaId("1234567890123456789" + numeroNoeudLance), port);
-            System.out.println("Je suis le noeud "+ kad1.getNode().getNodeId() +" avec le port " + kad1.getPort());
+            System.out.println(ANSI_PURPLE + "Je suis le noeud "+ kad1.getNode().getNodeId() +" avec le port " + kad1.getPort() + ANSI_RESET);
             File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroCle);
             InputStream targetStream = new FileInputStream(initialFile);
             ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert((port + 2), targetStream, motDePasse);
             Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance));
             serveur.start();
-            System.out.println("Je peux commencer à appeler les serveurs");
+            System.out.println(ANSI_PURPLE + "Je peux commencer à appeler les serveurs" + ANSI_RESET);
             Init_Reseau.initialisation(infos, certificatsPublics);
         }
         catch (IOException e)
@@ -81,6 +85,8 @@ class Accepter_clients implements Runnable {
 
   private Socket socket;
   int numeroNoeud;
+  public static final String ANSI_CYAN = "\u001B[36m";
+  public static final String ANSI_RESET = "\u001B[0m";
 
   public Accepter_clients(Socket s, int noeud){
     socket = s;
@@ -100,7 +106,7 @@ class Accepter_clients implements Runnable {
             PrintWriter writer;
             writer = new PrintWriter(socket.getOutputStream(), true);
             writer.println("Je suis le noeud " + numeroNoeud + " et je suis bien vivant!");
-            System.out.println("Un nouveau client s'est connecté !");
+            System.out.println(ANSI_CYAN + "Un nouveau client s'est connecté !" + ANSI_RESET);
         }else{
             PrintWriter writer;
             writer = new PrintWriter(socket.getOutputStream(), true);
@@ -119,6 +125,10 @@ class Boucle_Serveur implements Runnable {
  
     SSLServerSocket ssocket;
     int noeud;
+    
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_RESET = "\u001B[0m";
+    
     public Boucle_Serveur(SSLServerSocket s, int numeroNoeud){
         ssocket = s;
         noeud = numeroNoeud;
@@ -130,9 +140,9 @@ class Boucle_Serveur implements Runnable {
       try
       {
         while(true){
-            System.out.println("Je suis en attente de clients.");
+            System.out.println(ANSI_CYAN + "Je suis en attente de clients." + ANSI_RESET);
             socket= ssocket.accept();
-            System.out.println("Connexion cliente reçue.");
+            System.out.println(ANSI_CYAN + "Connexion cliente reçue." + ANSI_RESET);
             Thread t = new Thread(new Accepter_clients(socket, noeud));
             t.start();
         }
