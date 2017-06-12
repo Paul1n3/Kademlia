@@ -5,29 +5,19 @@
  */
 package kademlia.simulations;
 
-//import java.io.IOException;
-import java.io.BufferedReader;
-//import kademlia.JKademliaNode;
-//import kademlia.message.SimpleMessage;
-//import kademlia.message.SimpleReceiver;
-//import kademlia.node.KademliaId;
 
-//import java.io.IOException;
+import java.io.BufferedReader;
+
 import java.net.*;
-//import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLServerSocket;
-//import java.io.BufferedInputStream;
-//import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-//import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import java.security.KeyManagementException;
-//import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -142,7 +132,12 @@ class Accepter_clients implements Runnable {
                 SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
                 SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
             }
-        }else if(message[0].equals("DISCOVER")){ // Recueillir les infos de ce noeud
+        }else if(message[0].equals("DISCOVER")){
+            if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
+                System.out.println(ANSI_CYAN + "J'ai reçu un discover d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
+                SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
+                SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
+            }
             PrintWriter writer;
             writer = new PrintWriter(socket.getOutputStream(), true);
             String reponse = "";
