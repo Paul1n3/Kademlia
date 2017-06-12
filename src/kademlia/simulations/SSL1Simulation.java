@@ -62,7 +62,7 @@ public class SSL1Simulation {
             InputStream targetStream = new FileInputStream(initialFile);
             ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert(port, targetStream, motDePasse);
             
-            Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance, ports, adresses));
+            Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance));
             serveur.start();
             
             System.out.println(ANSI_PURPLE + "Je peux commencer à appeler les serveurs" + ANSI_RESET);
@@ -94,30 +94,13 @@ class Accepter_clients implements Runnable {
 
     private Socket socket;
     int numeroNoeud;
-    int [] listePorts;
-    InetAddress [] listeAdresses;
+    
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_RESET = "\u001B[0m";
 
-    public Accepter_clients(Socket s, int noeud, int []ports, InetAddress [] adresses){
+    public Accepter_clients(Socket s, int noeud){
         socket = s;
         numeroNoeud = noeud;
-        listePorts = new int [ports.length];
-        copieTabInt(listePorts, ports);
-        listeAdresses = new InetAddress [adresses.length];
-        copieTabAddr(listeAdresses, adresses);
-    }
-  
-    public void copieTabInt(int [] copie, int [] original){
-        for(int i = 0; i < original.length; i++){
-            copie[i] = original[i];
-        }
-    }
-  
-    public void copieTabAddr(InetAddress [] copie, InetAddress [] original){
-        for(int i = 0; i < original.length; i++){
-            copie[i] = original[i];
-        }
     }
         
     @Override
@@ -194,34 +177,15 @@ class Boucle_Serveur implements Runnable {
  
     SSLServerSocket ssocket;
     int noeud;
-    int [] listePorts;
-    InetAddress [] listeAdresses;
     
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_RESET = "\u001B[0m";
     
-    public Boucle_Serveur(SSLServerSocket s, int numeroNoeud, int [] ports, InetAddress [] adresses){
+    public Boucle_Serveur(SSLServerSocket s, int numeroNoeud){
         ssocket = s;
         noeud = numeroNoeud;
-        listePorts = new int [ports.length];
-        copieTabInt(listePorts, ports);
-        listeAdresses = new InetAddress [adresses.length];
-        copieTabAddr(listeAdresses, adresses);
     }
     
-    public void copieTabInt(int [] copie, int [] original){
-        for(int i = 0; i < original.length; i++){
-            copie[i] = original[i];
-        }
-    }
-  
-    public void copieTabAddr(InetAddress [] copie, InetAddress [] original){
-        for(int i = 0; i < original.length; i++){
-            copie[i] = original[i];
-        }
-    }
-       
-
     @Override
     public void run() {
       Socket socket;
@@ -232,7 +196,7 @@ class Boucle_Serveur implements Runnable {
             System.out.println(ANSI_CYAN + "Je suis en attente de clients." + ANSI_RESET);
             socket= ssocket.accept();
             System.out.println(ANSI_CYAN + "Connexion cliente reçue." + ANSI_RESET);
-            Thread t = new Thread(new Accepter_clients(socket, noeud, listePorts, listeAdresses));
+            Thread t = new Thread(new Accepter_clients(socket, noeud));
             t.start();
         }
         }catch (IOException e)

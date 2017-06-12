@@ -42,11 +42,6 @@ public class NoeudPrincipal {
         int numeroNoeudLance = 0;
         String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro"};
         
-        // Tables de connaissance du réseau
-        int [] ports = {0,0,0,0,0};
-        InetAddress [] adresses = new InetAddress [5];
-        
-        
         try
         {
             // Ouverture de la socket sécurisée serveur
@@ -54,7 +49,7 @@ public class NoeudPrincipal {
             InputStream targetStream = new FileInputStream(initialFile);
             ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert(port, targetStream, motDePasse);
             
-            Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance, ports, adresses));
+            Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance));
             serveur.start();
             System.out.println(ANSI_PURPLE + "Je peux commencer à appeler les serveurs" + ANSI_RESET);
         }
