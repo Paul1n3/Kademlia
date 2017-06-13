@@ -37,6 +37,7 @@ public class SSL1Simulation {
     // Tables de connaissance du réseau
     public static int [] ports = {0,0,0,0,0};
     public static InetAddress [] adresses = new InetAddress [5];
+    public static int compteur = 1;
     
     public static void main(String[] args) throws IOException,
         KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException, UnknownHostException, InterruptedException{
@@ -114,66 +115,66 @@ class Accepter_clients implements Runnable {
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         
         
-            // Réception du message client
-            messageRecu = reader.readLine();
-            System.out.println(ANSI_CYAN + messageRecu + ANSI_RESET);
-            String delims = "[:]";
-            String[] message = messageRecu.split(delims);
+        // Réception du message client
+        messageRecu = reader.readLine();
+        System.out.println(ANSI_CYAN + messageRecu + ANSI_RESET);
+        String delims = "[:]";
+        String[] message = messageRecu.split(delims);
 
-            /*while(true){
+        /*while(true){
 
-            }*/
+        }*/
 
-            if(message[0].equals("PING")){// && ((compteur%2) == 0)){
-                PrintWriter writer;
-                writer = new PrintWriter(socket.getOutputStream(), true);
-                writer.println("REPING:" + numeroNoeud);
-                System.out.println(ANSI_CYAN + "Un nouveau client s'est connecté !" + ANSI_RESET);
+        if(message[0].equals("PING")){
+            PrintWriter writer;
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            writer.println("REPING:" + numeroNoeud);
+            System.out.println(ANSI_CYAN + "Un nouveau client s'est connecté !" + ANSI_RESET);
 
-                // Ajout aux tables de connaissance d'un noeud non connu
-                if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
-                    System.out.println(ANSI_CYAN + "J'ai reçu un ping d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
-                    SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
-                    SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
-                }
-            }else if(message[0].equals("DISCOVER")){
-                // Ajout aux tables de connaissance d'un noeud non connu
-                if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
-                    System.out.println(ANSI_CYAN + "J'ai reçu un discover d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
-                    SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
-                    SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
-                }
+            // Ajout aux tables de connaissance d'un noeud non connu
+            if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
+                System.out.println(ANSI_CYAN + "J'ai reçu un ping d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
+                SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
+                SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
+            }
+        }else if(message[0].equals("DISCOVER")){
+            // Ajout aux tables de connaissance d'un noeud non connu
+            if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
+                System.out.println(ANSI_CYAN + "J'ai reçu un discover d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
+                SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
+                SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
+            }
 
-                //Envoi des noeuds connus par le serveur sous forme noNoeud:Port:Adresse
-                PrintWriter writer;
-                writer = new PrintWriter(socket.getOutputStream(), true);
-                String reponse = "";
-                for(int i = 0; i < SSL1Simulation.ports.length; i++){
-                    System.out.println(SSL1Simulation.ports[i]);
-                    String addr;
-                    String [] adresse;
-                    if((SSL1Simulation.ports[i] != 0) && i != Integer.parseInt(message[1])){
-                        addr = SSL1Simulation.adresses[i].toString();
-                        adresse = addr.split("/");
-                        if(reponse.equals("")){
-                            reponse = reponse + i + ":" + String.valueOf(SSL1Simulation.ports[i]) + ":";
-                            reponse = reponse + adresse[1];
-                        }else{
-                            reponse = reponse + ":" + i + ":" + String.valueOf(SSL1Simulation.ports[i]) + ":";
-                            reponse = reponse + adresse[1];
-                        }
+            //Envoi des noeuds connus par le serveur sous forme noNoeud:Port:Adresse
+            PrintWriter writer;
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            String reponse = "";
+            for(int i = 0; i < SSL1Simulation.ports.length; i++){
+                System.out.println(SSL1Simulation.ports[i]);
+                String addr;
+                String [] adresse;
+                if((SSL1Simulation.ports[i] != 0) && i != Integer.parseInt(message[1])){
+                    addr = SSL1Simulation.adresses[i].toString();
+                    adresse = addr.split("/");
+                    if(reponse.equals("")){
+                        reponse = reponse + i + ":" + String.valueOf(SSL1Simulation.ports[i]) + ":";
+                        reponse = reponse + adresse[1];
+                    }else{
+                        reponse = reponse + ":" + i + ":" + String.valueOf(SSL1Simulation.ports[i]) + ":";
+                        reponse = reponse + adresse[1];
                     }
                 }
-                writer.println(reponse);
-                System.out.println(ANSI_CYAN + "Le noeud " + message[1] + " vient de m'envoyer un discovery" + ANSI_RESET);
-                System.out.println(ANSI_CYAN + "Je lui réponds " + reponse + ANSI_RESET);
-            }else{
-                PrintWriter writer;
-                writer = new PrintWriter(socket.getOutputStream(), true);
-                writer.println("Communication avec le noeud " + numeroNoeud);
             }
+            writer.println(reponse);
+            System.out.println(ANSI_CYAN + "Le noeud " + message[1] + " vient de m'envoyer un discovery" + ANSI_RESET);
+            System.out.println(ANSI_CYAN + "Je lui réponds " + reponse + ANSI_RESET);
+        }else{
+            PrintWriter writer;
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            writer.println("Communication avec le noeud " + numeroNoeud);
+        }
+        SSL1Simulation.compteur++;
         
-
         socket.close();
     } catch (IOException e) {
         e.printStackTrace();
@@ -197,17 +198,17 @@ class Boucle_Serveur implements Runnable {
     
     @Override
     public void run() {
-      Socket socket;
-      try
-      {
-        while(true){
-            // Ecoute sur le port principal pour entendre les demandes de connexion et les gérer
-            System.out.println(ANSI_CYAN + "Je suis en attente de clients." + ANSI_RESET);
-            socket= ssocket.accept();
-            System.out.println(ANSI_CYAN + "Connexion cliente reçue." + ANSI_RESET);
-            Thread t = new Thread(new Accepter_clients(socket, noeud));
-            t.start();
-        }
+        Socket socket;
+        try
+        {
+            while(true){
+                // Ecoute sur le port principal pour entendre les demandes de connexion et les gérer
+                System.out.println(ANSI_CYAN + "Je suis en attente de clients." + ANSI_RESET);
+                socket= ssocket.accept();
+                System.out.println(ANSI_CYAN + "Connexion cliente reçue." + ANSI_RESET);
+                Thread t = new Thread(new Accepter_clients(socket, noeud));
+                t.start();
+            }
         }catch (IOException e)
         {
             e.printStackTrace();

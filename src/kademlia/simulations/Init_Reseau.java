@@ -20,6 +20,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import javax.net.ssl.SSLSocket;
 import java.net.SocketTimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -36,22 +38,18 @@ public class Init_Reseau {
     public static final String ANSI_PURPLE = "\u001B[35m";
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
-        
+    public static int numeroNoeud;
+    public static int compteur = 0;
+    public static SSLSocket socket;
+    public static BufferedReader reader;
+    public static String motDePasse = "";
+    public static int numeroPort;
+    public static InetAddress addr;
+    public static String reponse;
+    
     public static void initialisation(String [] infos, String [] certificatsPublics, int [] ports, InetAddress [] adresses, int port, InetAddress adresse, int noMonNoeud) throws IOException, UnknownHostException,
-            KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
+            KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, InterruptedException {
         
-        int compteur = 0;
-        SSLSocket socket;
-        BufferedReader reader;
-        String motDePasse = "";
-        int numeroNoeud;
-        int numeroPort;
-        InetAddress addr;
-        String reponse;
-        
-        
-        try
-        {
             while(compteur < infos.length){
                 // On récupère les numéros de port et adresse de chaque noeud
                 numeroNoeud = Integer.parseInt(infos[compteur]);
@@ -66,43 +64,65 @@ public class Init_Reseau {
                 motDePasse = certificatsPublics[numeroNoeud];
                 System.out.println(ANSI_BLUE + "Le mot de passe est " + motDePasse + ANSI_RESET);
                 
+                //Dans un thread séparé
+                Thread thread;
+                thread = new Thread(new Runnable(){
+                    @Override
+                    public void run(){
+                        
+                        try
+                        {
+                            // On essaie de se connecter de façon sécurisée
+                            File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat" + numeroNoeud);
+                            InputStream targetStream = new FileInputStream(initialFile);
+                            System.out.println(ANSI_BLUE + "Tentative de connection" + ANSI_RESET);
+                            socket = SSLSocketKeystoreFactory.getSocketWithCert(addr, numeroPort, targetStream, motDePasse);
+                            System.out.println(ANSI_GREEN + "Connection établie" + ANSI_RESET);
+                            
+                            // Envoi d'un PING au nouveau noeud connu pour vérifier son existance
+                            PrintWriter writer;
+                            writer = new PrintWriter(socket.getOutputStream(), true);
+                            writer.println("PING:" + noMonNoeud + ":" + port + ":" + "127.0.0.1");
+                            
+                            socket.setSoTimeout(20000);
+                            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                            reponse = reader.readLine();
+                            System.out.println(ANSI_BLUE + reponse + ANSI_RESET);
+                            
+                            String delims = "[:]";
+                            String[] reping = reponse.split(delims);
+                            // On vérifie si le message renvoyé provient bien de la bonne personne
+                            if(reping[0].equals("REPING") && reping[1].equals(Integer.toString(numeroNoeud))){
+                                System.out.println(ANSI_GREEN + "Le REPING vient bien de la bonne personne, je l'ajoute dans ma table" + ANSI_RESET);
+                                // On ajoute ce noeud dans notre connaissance du réseau
+                                ports[numeroNoeud] = numeroPort;
+                                adresses[numeroNoeud] = addr;
+                            }
+                            socket.close();
+                        }
+                        catch(SocketTimeoutException e){
+                            System.out.println(ANSI_GREEN + "Timeout" + ANSI_RESET);
+                        }
+
+                        catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        catch(KeyManagementException e){
+                            System.out.println("Problème lors de la connection");
+                        } catch (NoSuchAlgorithmException ex) {
+                            Logger.getLogger(Init_Reseau.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (CertificateException ex) {
+                            Logger.getLogger(Init_Reseau.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (KeyStoreException ex) {
+                            Logger.getLogger(Init_Reseau.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                });
+                thread.start();
+                thread.join();
                 
-                // On essaie de se connecter de façon sécurisée
-                File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat" + numeroNoeud);
-                InputStream targetStream = new FileInputStream(initialFile);
-                System.out.println(ANSI_BLUE + "Tentative de connection" + ANSI_RESET);
-                socket = SSLSocketKeystoreFactory.getSocketWithCert(addr, numeroPort, targetStream, motDePasse);
-                System.out.println(ANSI_GREEN + "Connection établie" + ANSI_RESET);
-                
-                // Envoi d'un PING au nouveau noeud connu pour vérifier son existance
-                PrintWriter writer;
-                writer = new PrintWriter(socket.getOutputStream(), true);
-                writer.println("PING:" + noMonNoeud + ":" + port + ":" + "127.0.0.1");
-                
-                socket.setSoTimeout(20000);
-                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                reponse = reader.readLine();
-                System.out.println(ANSI_BLUE + reponse + ANSI_RESET);
-                
-                String delims = "[:]";
-                String[] reping = reponse.split(delims);
-                // On vérifie si le message renvoyé provient bien de la bonne personne
-                if(reping[0].equals("REPING") && reping[1].equals(Integer.toString(numeroNoeud))){
-                    System.out.println(ANSI_GREEN + "Le REPING vient bien de la bonne personne, je l'ajoute dans ma table" + ANSI_RESET);
-                    // On ajoute ce noeud dans notre connaissance du réseau
-                    ports[numeroNoeud] = numeroPort;
-                    adresses[numeroNoeud] = addr;
-                }
-                socket.close();
             }
-        }catch(SocketTimeoutException e){
-            System.out.println(ANSI_GREEN + "Timeout" + ANSI_RESET);
-        }
-            
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
     }
 
 }

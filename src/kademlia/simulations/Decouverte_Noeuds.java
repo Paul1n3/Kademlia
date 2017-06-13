@@ -35,12 +35,12 @@ public class Decouverte_Noeuds {
     public static final String ANSI_PURPLE = "\u001B[35m";
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
+    public static BufferedReader reader;
+    public static SSLSocket socket;
         
     public static void discovery(String [] certificatsPublics, int [] ports, InetAddress [] adresses, int port, InetAddress adresse, int noMonNoeud) throws IOException, UnknownHostException,
             KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
         
-        SSLSocket socket;
-        BufferedReader reader;
         
         try
         {
@@ -61,52 +61,69 @@ public class Decouverte_Noeuds {
                     writer = new PrintWriter(socket.getOutputStream(), true);
                     writer.println("DISCOVER:" + noMonNoeud + ":" + port + ":" + "127.0.0.1");
                     
-                    // Réceptiond de la réponse du DISCOVER
-                    socket.setSoTimeout(20000);
-                    reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    String reponse = reader.readLine();
-                    System.out.println(ANSI_GREEN + reponse + ANSI_RESET);
                     
-                    //Traitement de la réponse
-                    int compteur = 0;
-                    int numeroNoeud;
-                    int numeroPort;
-                    InetAddress address;
-                    String delims = "[:]";
-                    String[] nouveautes = reponse.split(delims);
-                    if(!reponse.equals("")){
-                        while(compteur < nouveautes.length){
-                            numeroNoeud = Integer.parseInt(nouveautes[compteur]);
-                            System.out.println(ANSI_BLUE + "Infos sur le noeud " + numeroNoeud + ANSI_RESET);
-                            compteur++;
-                            numeroPort = Integer.parseInt(nouveautes[compteur]);
-                            System.out.println(ANSI_BLUE + "Son numéro de port est " + numeroPort + ANSI_RESET);
-                            compteur++;
-                            address = InetAddress.getByName(nouveautes[compteur]);
-                            System.out.println(ANSI_BLUE + "Son adresse IP est " + address + ANSI_RESET);
-                            compteur++;
-                            
-                            // Si on ne connaît pas le noeud, on le rajoute dans notre connaissance du réseau
-                            if(SSL1Simulation.ports[numeroNoeud]== 0){
-                                System.out.println(ANSI_BLUE + "J'ai des nouveautés sur le noeud " + numeroNoeud + " : je le rajoute !" + ANSI_RESET);
-                                SSL1Simulation.ports[numeroNoeud] = numeroPort;
-                                SSL1Simulation.adresses[numeroNoeud] = address;
-                            }else{
-                                System.out.println(ANSI_BLUE + "Je le connais déjà" + ANSI_RESET);
+                    
+                    Thread thread;
+                    thread = new Thread(new Runnable(){
+                        @Override
+                        public void run(){
+                        
+                            try
+                            {
+                                // Réceptiond de la réponse du DISCOVER
+                                socket.setSoTimeout(20000);
+                                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                                String reponse = reader.readLine();
+                                System.out.println(ANSI_GREEN + reponse + ANSI_RESET);
+
+                                //Traitement de la réponse  
+
+                                int compteur = 0;
+                                int numeroNoeud;
+                                int numeroPort;
+                                InetAddress address;
+                                String delims = "[:]";
+                                String[] nouveautes = reponse.split(delims);
+                                if(!reponse.equals("")){
+                                    while(compteur < nouveautes.length){
+                                        numeroNoeud = Integer.parseInt(nouveautes[compteur]);
+                                        System.out.println(ANSI_BLUE + "Infos sur le noeud " + numeroNoeud + ANSI_RESET);
+                                        compteur++;
+                                        numeroPort = Integer.parseInt(nouveautes[compteur]);
+                                        System.out.println(ANSI_BLUE + "Son numéro de port est " + numeroPort + ANSI_RESET);
+                                        compteur++;
+                                        address = InetAddress.getByName(nouveautes[compteur]);
+                                        System.out.println(ANSI_BLUE + "Son adresse IP est " + address + ANSI_RESET);
+                                        compteur++;
+
+                                        // Si on ne connaît pas le noeud, on le rajoute dans notre connaissance du réseau
+                                        if(SSL1Simulation.ports[numeroNoeud]== 0){
+                                            System.out.println(ANSI_BLUE + "J'ai des nouveautés sur le noeud " + numeroNoeud + " : je le rajoute !" + ANSI_RESET);
+                                            SSL1Simulation.ports[numeroNoeud] = numeroPort;
+                                            SSL1Simulation.adresses[numeroNoeud] = address;
+                                        }else{
+                                            System.out.println(ANSI_BLUE + "Je le connais déjà" + ANSI_RESET);
+                                        }
+                                    }
+                                }
+                                socket.close();
+                            }catch(SocketTimeoutException e){
+                                System.out.println("Timeout");
+                            }
+                            catch (IOException e)
+                            {
+                                e.printStackTrace();
                             }
                         }
-                    }
-                    socket.close();
+                    });
                 }
+            }
+        }catch (IOException e)
+            {
+                e.printStackTrace();
             }
             
                 
-        }catch(SocketTimeoutException e){
-            System.out.println("Timeout");
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        
     } 
 }
