@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -61,6 +62,7 @@ public class Decouverte_Noeuds {
                     writer.println("DISCOVER:" + noMonNoeud + ":" + port + ":" + "127.0.0.1");
                     
                     // Réceptiond de la réponse du DISCOVER
+                    socket.setSoTimeout(20000);
                     reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     String reponse = reader.readLine();
                     System.out.println(ANSI_GREEN + reponse + ANSI_RESET);
@@ -99,6 +101,8 @@ public class Decouverte_Noeuds {
             }
             
                 
+        }catch(SocketTimeoutException e){
+            System.out.println("Timeout");
         }
         catch (IOException e)
         {

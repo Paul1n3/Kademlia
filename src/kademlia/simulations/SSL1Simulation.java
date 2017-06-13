@@ -39,7 +39,7 @@ public class SSL1Simulation {
     public static InetAddress [] adresses = new InetAddress [5];
     
     public static void main(String[] args) throws IOException,
-        KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException{
+        KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException, UnknownHostException, InterruptedException{
         
         SSLServerSocket ssocket;
         int port = Integer.parseInt(args[0]);
@@ -94,6 +94,7 @@ class Accepter_clients implements Runnable {
 
     private Socket socket;
     int numeroNoeud;
+    int compteur;
     
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_RESET = "\u001B[0m";
@@ -101,6 +102,7 @@ class Accepter_clients implements Runnable {
     public Accepter_clients(Socket s, int noeud){
         socket = s;
         numeroNoeud = noeud;
+        compteur = 1;
     }
         
     @Override
@@ -109,61 +111,68 @@ class Accepter_clients implements Runnable {
         String messageRecu;
 
     try {
-        // Réception du message client
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        messageRecu = reader.readLine();
-        System.out.println(messageRecu);
-        String delims = "[:]";
-        String[] message = messageRecu.split(delims);
         
-        if(message[0].equals("PING")){
-            PrintWriter writer;
-            writer = new PrintWriter(socket.getOutputStream(), true);
-            writer.println("REPING:" + numeroNoeud);
-            System.out.println(ANSI_CYAN + "Un nouveau client s'est connecté !" + ANSI_RESET);
-            
-            // Ajout aux tables de connaissance d'un noeud non connu
-            if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
-                System.out.println(ANSI_CYAN + "J'ai reçu un ping d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
-                SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
-                SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
-            }
-        }else if(message[0].equals("DISCOVER")){
-            // Ajout aux tables de connaissance d'un noeud non connu
-            if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
-                System.out.println(ANSI_CYAN + "J'ai reçu un discover d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
-                SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
-                SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
-            }
-            
-            //Envoi des noeuds connus par le serveur sous forme noNoeud:Port:Adresse
-            PrintWriter writer;
-            writer = new PrintWriter(socket.getOutputStream(), true);
-            String reponse = "";
-            for(int i = 0; i < SSL1Simulation.ports.length; i++){
-                System.out.println(SSL1Simulation.ports[i]);
-                String addr;
-                String [] adresse;
-                if((SSL1Simulation.ports[i] != 0) && i != Integer.parseInt(message[1])){
-                    addr = SSL1Simulation.adresses[i].toString();
-                    adresse = addr.split("/");
-                    if(reponse.equals("")){
-                        reponse = reponse + i + ":" + String.valueOf(SSL1Simulation.ports[i]) + ":";
-                        reponse = reponse + adresse[1];
-                    }else{
-                        reponse = reponse + ":" + i + ":" + String.valueOf(SSL1Simulation.ports[i]) + ":";
-                        reponse = reponse + adresse[1];
+        
+            // Réception du message client
+            messageRecu = reader.readLine();
+            System.out.println(ANSI_CYAN + messageRecu + ANSI_RESET);
+            String delims = "[:]";
+            String[] message = messageRecu.split(delims);
+
+            /*while(true){
+
+            }*/
+
+            if(message[0].equals("PING")){// && ((compteur%2) == 0)){
+                PrintWriter writer;
+                writer = new PrintWriter(socket.getOutputStream(), true);
+                writer.println("REPING:" + numeroNoeud);
+                System.out.println(ANSI_CYAN + "Un nouveau client s'est connecté !" + ANSI_RESET);
+
+                // Ajout aux tables de connaissance d'un noeud non connu
+                if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
+                    System.out.println(ANSI_CYAN + "J'ai reçu un ping d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
+                    SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
+                    SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
+                }
+            }else if(message[0].equals("DISCOVER")){
+                // Ajout aux tables de connaissance d'un noeud non connu
+                if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
+                    System.out.println(ANSI_CYAN + "J'ai reçu un discover d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
+                    SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
+                    SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
+                }
+
+                //Envoi des noeuds connus par le serveur sous forme noNoeud:Port:Adresse
+                PrintWriter writer;
+                writer = new PrintWriter(socket.getOutputStream(), true);
+                String reponse = "";
+                for(int i = 0; i < SSL1Simulation.ports.length; i++){
+                    System.out.println(SSL1Simulation.ports[i]);
+                    String addr;
+                    String [] adresse;
+                    if((SSL1Simulation.ports[i] != 0) && i != Integer.parseInt(message[1])){
+                        addr = SSL1Simulation.adresses[i].toString();
+                        adresse = addr.split("/");
+                        if(reponse.equals("")){
+                            reponse = reponse + i + ":" + String.valueOf(SSL1Simulation.ports[i]) + ":";
+                            reponse = reponse + adresse[1];
+                        }else{
+                            reponse = reponse + ":" + i + ":" + String.valueOf(SSL1Simulation.ports[i]) + ":";
+                            reponse = reponse + adresse[1];
+                        }
                     }
                 }
+                writer.println(reponse);
+                System.out.println(ANSI_CYAN + "Le noeud " + message[1] + " vient de m'envoyer un discovery" + ANSI_RESET);
+                System.out.println(ANSI_CYAN + "Je lui réponds " + reponse + ANSI_RESET);
+            }else{
+                PrintWriter writer;
+                writer = new PrintWriter(socket.getOutputStream(), true);
+                writer.println("Communication avec le noeud " + numeroNoeud);
             }
-            writer.println(reponse);
-            System.out.println(ANSI_CYAN + "Le noeud " + message[1] + " vient de m'envoyer un discovery" + ANSI_RESET);
-            System.out.println(ANSI_CYAN + "Je lui réponds " + reponse + ANSI_RESET);
-        }else{
-            PrintWriter writer;
-            writer = new PrintWriter(socket.getOutputStream(), true);
-            writer.println("Communication avec le noeud " + numeroNoeud);
-        }
+        
 
         socket.close();
     } catch (IOException e) {

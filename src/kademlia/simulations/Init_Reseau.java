@@ -19,6 +19,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import javax.net.ssl.SSLSocket;
+import java.net.SocketTimeoutException;
 
 /**
  *
@@ -78,6 +79,7 @@ public class Init_Reseau {
                 writer = new PrintWriter(socket.getOutputStream(), true);
                 writer.println("PING:" + noMonNoeud + ":" + port + ":" + "127.0.0.1");
                 
+                socket.setSoTimeout(20000);
                 reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 reponse = reader.readLine();
                 System.out.println(ANSI_BLUE + reponse + ANSI_RESET);
@@ -93,6 +95,8 @@ public class Init_Reseau {
                 }
                 socket.close();
             }
+        }catch(SocketTimeoutException e){
+            System.out.println(ANSI_GREEN + "Timeout" + ANSI_RESET);
         }
             
         catch (IOException e)
