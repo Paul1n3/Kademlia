@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -39,7 +40,7 @@ public class Decouverte_Noeuds {
     public static SSLSocket socket;
         
     public static void discovery(String [] certificatsPublics, int [] ports, InetAddress [] adresses, int port, InetAddress adresse, int noMonNoeud) throws IOException, UnknownHostException,
-            KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
+            KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, InterruptedException {
         
         
         try
@@ -110,12 +111,17 @@ public class Decouverte_Noeuds {
                             }catch(SocketTimeoutException e){
                                 System.out.println("Timeout");
                             }
+                            catch(ConnectException e){
+                                System.out.println("Noeud indisponible");
+                            }
                             catch (IOException e)
                             {
                                 e.printStackTrace();
                             }
                         }
                     });
+                    thread.start();
+                    thread.join();
                 }
             }
         }catch (IOException e)

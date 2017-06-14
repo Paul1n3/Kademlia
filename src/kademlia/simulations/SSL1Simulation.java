@@ -38,47 +38,78 @@ public class SSL1Simulation {
     public static int [] ports = {0,0,0,0,0};
     public static InetAddress [] adresses = new InetAddress [5];
     public static int compteur = 1;
+    public static boolean enFonctionnement = true;
+    public static boolean peutEtreFerme = false;
+    public static boolean estFermee = false;
     
     public static void main(String[] args) throws IOException,
         KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException, UnknownHostException, InterruptedException{
         
-        SSLServerSocket ssocket;
+        SSLServerSocket ssocket = null;
         int port = Integer.parseInt(args[0]);
-        
+
         // Mot de passe de la clé privée
         String motDePasse = args[1];
         int numeroNoeudLance = Integer.parseInt(args[2]);
         InetAddress adresse = InetAddress.getLocalHost();
-        
+
         // Connaissances initiales sous forme numNoeud:@IP:numPort
         String delims = "[:]";
         String[] infos = args[3].split(delims);
-        
+        double peutFonctionner = 0.0;
+        double ancienPeutFonctionner;
+        int tempsPause = 20000;
+
         String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro"};
         
-        try
-        {
-            // Ouverture de la socket sécurisée serveur
-            File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroNoeudLance);
-            InputStream targetStream = new FileInputStream(initialFile);
-            ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert(port, targetStream, motDePasse);
-            
-            Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance));
-            serveur.start();
-            
-            System.out.println(ANSI_PURPLE + "Je peux commencer à appeler les serveurs" + ANSI_RESET);
-            
-            Init_Reseau.initialisation(infos, certificatsPublics, ports, adresses, port, adresse, numeroNoeudLance);
-            System.out.println(ANSI_PURPLE + "Je connais maintenant mon réseau!" + ANSI_RESET);
-            afficheTab(ports);
-            
-            Decouverte_Noeuds.discovery(certificatsPublics, ports, adresses, port, adresse, numeroNoeudLance);
-            //Faire envois de messages random
-            
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
+        while(true){
+            try
+            {
+                ancienPeutFonctionner = peutFonctionner;
+                peutFonctionner = Math.random();
+                if(peutFonctionner >= 0.5){
+                    if(ancienPeutFonctionner < 0.5){
+                        if(ssocket == null){
+                            estFermee = true;
+                        }else{
+                            if(ssocket.isClosed()){
+                                estFermee = true;
+                            }
+                        }
+                        
+                        if(estFermee){
+                        // Ouverture de la socket sécurisée serveur
+                            File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/CLE" + numeroNoeudLance);
+                            InputStream targetStream = new FileInputStream(initialFile);
+                            ssocket = SSLServerSocketKeystoreFactory.getServerSocketWithCert(port, targetStream, motDePasse);
+                            enFonctionnement = true;
+
+                            Thread serveur = new Thread(new Boucle_Serveur(ssocket, numeroNoeudLance));
+                            serveur.start();
+
+                            System.out.println(ANSI_PURPLE + "Je peux commencer à appeler les serveurs" + ANSI_RESET);
+
+                            Init_Reseau.initialisation(infos, certificatsPublics, ports, adresses, port, adresse, numeroNoeudLance);
+                            System.out.println(ANSI_PURPLE + "Je connais maintenant mon réseau!" + ANSI_RESET);
+                            afficheTab(ports);
+
+                            Decouverte_Noeuds.discovery(certificatsPublics, ports, adresses, port, adresse, numeroNoeudLance);
+                        }
+                    }
+                    //Faire envois de messages random
+                    System.out.println("Envoi de messages aux autres noeuds");
+                }else{
+                    enFonctionnement = false;
+                    System.out.println("Noeud en pause pour " + tempsPause + " secondes.");
+                }
+                Thread.sleep(tempsPause);
+                estFermee = false;
+
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
     
@@ -187,6 +218,7 @@ class Boucle_Serveur implements Runnable {
  
     SSLServerSocket ssocket;
     int noeud;
+    boolean aMarche = false;
     
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_RESET = "\u001B[0m";
@@ -201,13 +233,17 @@ class Boucle_Serveur implements Runnable {
         Socket socket;
         try
         {
-            while(true){
+            while(SSL1Simulation.enFonctionnement == true){
                 // Ecoute sur le port principal pour entendre les demandes de connexion et les gérer
                 System.out.println(ANSI_CYAN + "Je suis en attente de clients." + ANSI_RESET);
                 socket= ssocket.accept();
                 System.out.println(ANSI_CYAN + "Connexion cliente reçue." + ANSI_RESET);
                 Thread t = new Thread(new Accepter_clients(socket, noeud));
                 t.start();
+                aMarche = true;
+            }
+            if(aMarche == true){
+                ssocket.close();
             }
         }catch (IOException e)
         {

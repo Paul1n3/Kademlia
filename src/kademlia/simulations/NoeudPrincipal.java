@@ -53,6 +53,9 @@ public class NoeudPrincipal {
             serveur.start();
             System.out.println(ANSI_PURPLE + "Je peux commencer à appeler les serveurs" + ANSI_RESET);
         }
+        catch(ConnectException e){
+            System.out.println("Noeud indisponible");
+        }
         catch (IOException e)
         {
             e.printStackTrace();
