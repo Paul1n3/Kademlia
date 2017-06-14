@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
@@ -46,10 +47,13 @@ public class Init_Reseau {
     public static int numeroPort;
     public static InetAddress addr;
     public static String reponse;
+    public static int zone;
+    public static int numero;
     
-    public static void initialisation(String [] infos, String [] certificatsPublics, int [] ports, InetAddress [] adresses, int port, InetAddress adresse, int noMonNoeud) throws IOException, UnknownHostException,
+    public static void initialisation(String [] infos, String [] certificatsPublics, int [][] ports, InetAddress [][] adresses, int port, InetAddress adresse, int noMonNoeud) throws IOException, UnknownHostException,
             KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, InterruptedException {
         
+            
             while(compteur < infos.length){
                 // On récupère les numéros de port et adresse de chaque noeud
                 numeroNoeud = Integer.parseInt(infos[compteur]);
@@ -95,15 +99,19 @@ public class Init_Reseau {
                             if(reping[0].equals("REPING") && reping[1].equals(Integer.toString(numeroNoeud))){
                                 System.out.println(ANSI_GREEN + "Le REPING vient bien de la bonne personne, je l'ajoute dans ma table" + ANSI_RESET);
                                 // On ajoute ce noeud dans notre connaissance du réseau
-                                ports[numeroNoeud] = numeroPort;
-                                adresses[numeroNoeud] = addr;
+                                zone = SSL1Simulation.trouveZone(numeroNoeud);
+                                numero = SSL1Simulation.convertNumero(numeroNoeud, zone);
+                                ports[zone][numeroNoeud] = numeroPort;
+                                adresses[zone][numeroNoeud] = addr;
                             }
                             socket.close();
                         }
                         catch(SocketTimeoutException e){
                             System.out.println(ANSI_GREEN + "Timeout" + ANSI_RESET);
                         }
-
+                        catch(ConnectException e){
+                            System.out.println("Noeud indisponible");
+                        }
                         catch (IOException e)
                         {
                             e.printStackTrace();
@@ -123,6 +131,7 @@ public class Init_Reseau {
                 thread.join();
                 
             }
+            
     }
-
+    
 }

@@ -98,13 +98,13 @@ public class Operation_reseau {
                                         compteur++;
 
                                         // Si on ne connaît pas le noeud, on le rajoute dans notre connaissance du réseau
-                                        if(SSL1Simulation.ports[numeroNoeud]== 0){
+                                        /*if(SSL1Simulation.ports[numeroNoeud]== 0){
                                             System.out.println(ANSI_BLUE + "J'ai des nouveautés sur le noeud " + numeroNoeud + " : je le rajoute !" + ANSI_RESET);
                                             SSL1Simulation.ports[numeroNoeud] = numeroPort;
                                             SSL1Simulation.adresses[numeroNoeud] = address;
                                         }else{
                                             System.out.println(ANSI_BLUE + "Je le connais déjà" + ANSI_RESET);
-                                        }
+                                        }*/
                                     }
                                 }
                                 socket.close();
