@@ -35,12 +35,13 @@ public class SSL1Simulation {
     public static final String ANSI_RESET = "\u001B[0m";
     
     // Tables de connaissance du réseau
-    public static int [] ports = {0,0,0,0,0};
+    public static int [] ports = new int [40];
     public static InetAddress [] adresses = new InetAddress [5];
     public static int compteur = 1;
     public static boolean enFonctionnement = true;
     public static boolean peutEtreFerme = false;
     public static boolean estFermee = false;
+    public static int k = 3;
     
     public static void main(String[] args) throws IOException,
         KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException, UnknownHostException, InterruptedException{
@@ -56,6 +57,11 @@ public class SSL1Simulation {
         // Connaissances initiales sous forme numNoeud:@IP:numPort
         String delims = "[:]";
         String[] infos = args[3].split(delims);
+        
+        for(int i = 0; i < ports.length; i++){
+            ports[i] = 0;
+        }
+        
         double peutFonctionner = 0.0;
         double ancienPeutFonctionner;
         int tempsPause = 20000;
@@ -95,6 +101,9 @@ public class SSL1Simulation {
 
                             Decouverte_Noeuds.discovery(certificatsPublics, ports, adresses, port, adresse, numeroNoeudLance);
                         }
+                        if(!estFermee){
+                            Operation_Reseau.rafraichissement(numeroNoeudLance, certificatsPublics, port, adresse);
+                        }
                     }
                     //Faire envois de messages random
                     System.out.println("Envoi de messages aux autres noeuds");
@@ -118,6 +127,21 @@ public class SSL1Simulation {
             System.out.println(ANSI_PURPLE + tab[i] + ANSI_RESET);
         }
     }
+    
+    public static int trouveZone(int numeroNoeud){
+        if(0 <= numeroNoeud && numeroNoeud < 10){
+            return 0;
+        }else if(10 <= numeroNoeud && numeroNoeud < 20){
+            return 1;
+        }else if(20 <= numeroNoeud && numeroNoeud < 30){
+            return 2;
+        }else if(30 <= numeroNoeud && numeroNoeud < 40){
+            return 3;
+        }
+        return -1;
+    }
+    
+    
     
     
 }
