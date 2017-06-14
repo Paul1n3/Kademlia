@@ -35,8 +35,15 @@ public class SSL1Simulation {
     public static final String ANSI_RESET = "\u001B[0m";
     
     // Tables de connaissance du réseau
-    public static int [] ports = new int [40];
-    public static InetAddress [] adresses = new InetAddress [5];
+    public static int [] ports = new int [10];
+    public static int [] ports1 = new int [10];
+    public static int [] ports2 = new int [10];
+    public static int [] ports3 = new int [10];
+    public static InetAddress [] adresses = new InetAddress [10];
+    public static InetAddress [] adresses1 = new InetAddress [10];
+    public static InetAddress [] adresses2 = new InetAddress [10];
+    public static InetAddress [] adresses3 = new InetAddress [10];
+    
     public static int compteur = 1;
     public static boolean enFonctionnement = true;
     public static boolean peutEtreFerme = false;
@@ -102,7 +109,7 @@ public class SSL1Simulation {
                             Decouverte_Noeuds.discovery(certificatsPublics, ports, adresses, port, adresse, numeroNoeudLance);
                         }
                         if(!estFermee){
-                            Operation_Reseau.rafraichissement(numeroNoeudLance, certificatsPublics, port, adresse);
+                            //Operation_Reseau.rafraichissement(numeroNoeudLance, certificatsPublics, port, adresse);
                         }
                     }
                     //Faire envois de messages random
@@ -180,6 +187,7 @@ class Accepter_clients implements Runnable {
 
         }*/
 
+        // TRAITEMENT DU MESSAGE PING
         if(message[0].equals("PING")){
             PrintWriter writer;
             writer = new PrintWriter(socket.getOutputStream(), true);
@@ -192,7 +200,10 @@ class Accepter_clients implements Runnable {
                 SSL1Simulation.ports[Integer.parseInt(message[1])] = Integer.parseInt(message[2]);
                 SSL1Simulation.adresses[Integer.parseInt(message[1])] = InetAddress.getByName(message[3]);
             }
-        }else if(message[0].equals("DISCOVER")){
+        }
+        
+        // TRAITEMENT DU MESSAGE DISCOVER
+        else if(message[0].equals("DISCOVER")){
             // Ajout aux tables de connaissance d'un noeud non connu
             if(SSL1Simulation.ports[Integer.parseInt(message[1])]== 0){
                 System.out.println(ANSI_CYAN + "J'ai reçu un discover d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
@@ -205,7 +216,7 @@ class Accepter_clients implements Runnable {
             writer = new PrintWriter(socket.getOutputStream(), true);
             String reponse = "";
             for(int i = 0; i < SSL1Simulation.ports.length; i++){
-                System.out.println(SSL1Simulation.ports[i]);
+                //System.out.println(SSL1Simulation.ports[i]);
                 String addr;
                 String [] adresse;
                 if((SSL1Simulation.ports[i] != 0) && i != Integer.parseInt(message[1])){
