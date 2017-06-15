@@ -46,7 +46,7 @@ public class SSL1Simulation {
     public static boolean enFonctionnement = true;
     public static boolean peutEtreFerme = false;
     public static boolean estFermee = false;
-    public static int k = 1;
+    public static int k = 3;
     public static int port;
     public static String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro"};
     
@@ -132,8 +132,10 @@ public class SSL1Simulation {
                         numeroCase = SSL1Simulation.convertNumero(aTrouver, zone);
                         if(ports[zone][numeroCase] != 0){
                             System.out.println(ANSI_PURPLE + "Je connais le noeud donc je lui envoie directement le message" + ANSI_RESET);
-                        }else{
+                        }else if(aTrouver != numeroNoeudLance){
                             Operation_reseau.lookupOperation(aTrouver, numeroNoeudLance);
+                        }else{
+                            System.out.println("Pas de message à envoyer.");
                         }
                     }else{
                         System.out.println(ANSI_PURPLE + "Pas d'opération à l'ouverture de la connexion" + ANSI_RESET);
@@ -342,7 +344,10 @@ class Accepter_clients implements Runnable {
                 writer = new PrintWriter(socket.getOutputStream(), true);
                 writer.println("FOUND:" + numeroNoeud + ":" + message[4] + ":" + SSL1Simulation.ports[zone][numero] + ":" + SSL1Simulation.adresses[zone][numero]);
             }else{
-                System.out.println(ANSI_CYAN + "Je ne connais pas ce noeud, je vais donc l'orienter vers d'autre noeuds de la zone." + ANSI_RESET);
+                System.out.println(ANSI_CYAN + "Je ne connais pas ce noeud." + ANSI_RESET);
+                PrintWriter writer;
+                writer = new PrintWriter(socket.getOutputStream(), true);
+                writer.println("NOTFOUND:" + numeroNoeud);
             }
         
             

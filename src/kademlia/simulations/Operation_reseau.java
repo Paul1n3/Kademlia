@@ -144,7 +144,7 @@ public class Operation_reseau {
                     System.out.println(ANSI_GREEN + reponse + ANSI_RESET);
 
 
-                    /*String delims = "[:]";
+                    String delims = "[:]";
                     String[] reping = reponse.split(delims);
                     // On vérifie si le message renvoyé provient bien de la bonne personne
                     if(reping[0].equals("RELOOKUP") && reping[1].equals(Integer.toString(numeroAContacter))){
@@ -155,9 +155,13 @@ public class Operation_reseau {
                             SSL1Simulation.adresses[zone][numeroCase] = InetAddress.getByName(reping[4]);
                             System.out.println("Envoyer un message au noeud trouvé");
                         }
-                    }else{
+                    }
+                    else if(reping[0].equals("NOTFOUND") && reping[1].equals(Integer.toString(numeroAContacter))){
+                        System.out.println("Le noeud " + numeroAContacter + " ne connait pas le noeud que je veux contacter.");
+                    }
+                    else{
                         System.out.println("Ce n'est pas la bonne personne qui a répondu");
-                    }*/
+                    }
                     socket.close();
                     check = true;
                 }
