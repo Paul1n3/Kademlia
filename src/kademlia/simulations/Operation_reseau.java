@@ -83,10 +83,7 @@ public class Operation_reseau {
                         if(reping[0].equals("REPING") && reping[1].equals(Integer.toString(numero))){
                             System.out.println(ANSI_GREEN + "Le REPING vient bien de la bonne personne, c'est bon!" + ANSI_RESET);
                         }else{
-                            zone = SSL1Simulation.trouveZone(numero);
-                            numeroTab = SSL1Simulation.convertNumero(numero, zone);
-                            SSL1Simulation.ports[zone][numeroTab] = SSL1Simulation.ports[i][j];
-                            SSL1Simulation.adresses[zone][numeroTab] = SSL1Simulation.adresses[i][j];
+                            System.out.println("Ce n'est pas la bonne personne qui a répondu");
                         }
                         socket.close();
                         check = true;
@@ -105,4 +102,75 @@ public class Operation_reseau {
             e.printStackTrace();
         }   
     } 
+    
+    
+    public static void lookupOperation(int numeroATrouver, int monNumero) throws IOException, UnknownHostException,
+            KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, InterruptedException{
+        int numeroCase;
+        int zone;
+        int numeroAContacter;
+        int numeroTab;
+        boolean check = false;
+        
+        try
+        {
+            // On envoie un lookup à tous les noeuds de la même zone
+            zone = SSL1Simulation.trouveZone(numeroATrouver);
+            numeroCase = SSL1Simulation.convertNumero(numeroATrouver, zone);
+            for(int i = 0; i < 10; i++){
+                numeroAContacter = zone * 10 + i;
+                if(SSL1Simulation.ports[zone][i] != 0 && numeroAContacter != monNumero){
+
+                    // Tentative de connexion au noeud de manière sécurisée
+                    File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat" + numeroAContacter);
+                    InputStream targetStream = new FileInputStream(initialFile);
+                    System.out.println(ANSI_BLUE + "Tentative d'envoi de lookup au noeud " + numeroAContacter + ANSI_RESET);
+                    socket = SSLSocketKeystoreFactory.getSocketWithCert(SSL1Simulation.adresses[zone][i], SSL1Simulation.ports[zone][i], targetStream, SSL1Simulation.certificatsPublics[numeroAContacter]);
+                    System.out.println(ANSI_GREEN + "Connection établie avec le noeud " + numeroAContacter + ANSI_RESET);
+
+                    // Envoi du message LOOKUP
+                    PrintWriter writer;
+                    writer = new PrintWriter(socket.getOutputStream(), true);
+                    writer.println("LOOKUP:" + monNumero + ":" + SSL1Simulation.port + ":" + "127.0.0.1" + ":" + numeroATrouver);
+
+
+
+
+                    // Réception de la réponse du LOOKUP
+                    socket.setSoTimeout(20000);
+                    reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    String reponse = reader.readLine();
+                    System.out.println(ANSI_GREEN + reponse + ANSI_RESET);
+
+
+                    String delims = "[:]";
+                    String[] reping = reponse.split(delims);
+                    // On vérifie si le message renvoyé provient bien de la bonne personne
+                    if(reping[0].equals("RELOOKUP") && reping[1].equals(Integer.toString(numeroAContacter))){
+                        System.out.println(ANSI_GREEN + "Le REPING vient bien de la bonne personne, c'est bon!" + ANSI_RESET);
+                        if(reping[2].equals(Integer.toString(numeroATrouver))){
+                            System.out.println("Le noeud a été trouvé! Je l'ajoute dans ma table de routage");
+                            SSL1Simulation.ports[zone][numeroCase] = Integer.parseInt(reping[3]);
+                            SSL1Simulation.adresses[zone][numeroCase] = InetAddress.getByName(reping[4]);
+                        }
+                    }else{
+                        System.out.println("Ce n'est pas la bonne personne qui a répondu");
+                    }
+                    socket.close();
+                    check = true;
+                }
+                
+                check = false;
+            }
+        }catch(SocketTimeoutException e){
+            System.out.println("Timeout");
+        }
+        catch(ConnectException e){
+            System.out.println("Noeud indisponible");
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
