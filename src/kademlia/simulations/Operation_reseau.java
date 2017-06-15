@@ -91,11 +91,14 @@ public class Operation_reseau {
                 }
                 check = false;
             }
-        }catch(SocketTimeoutException e){
-            System.out.println("Timeout");
+        }catch(NullPointerException e){
+            System.out.println(ANSI_RED + "Pas de réponse de la part du noeud contacté" + ANSI_RESET);
+        }
+        catch(SocketTimeoutException e){
+            System.out.println(ANSI_RED + "Timeout" + ANSI_RESET);
         }
         catch(ConnectException e){
-            System.out.println("Noeud indisponible");
+            System.out.println(ANSI_RED + "Noeud indisponible" + ANSI_RESET);
         }
         catch (IOException e)
         {
@@ -134,8 +137,6 @@ public class Operation_reseau {
                     writer.println("LOOKUP:" + monNumero + ":" + SSL1Simulation.port + ":" + "127.0.0.1" + ":" + numeroATrouver);
 
 
-
-
                     // Réception de la réponse du LOOKUP
                     socket.setSoTimeout(20000);
                     reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -143,7 +144,7 @@ public class Operation_reseau {
                     System.out.println(ANSI_GREEN + reponse + ANSI_RESET);
 
 
-                    String delims = "[:]";
+                    /*String delims = "[:]";
                     String[] reping = reponse.split(delims);
                     // On vérifie si le message renvoyé provient bien de la bonne personne
                     if(reping[0].equals("RELOOKUP") && reping[1].equals(Integer.toString(numeroAContacter))){
@@ -152,21 +153,25 @@ public class Operation_reseau {
                             System.out.println("Le noeud a été trouvé! Je l'ajoute dans ma table de routage");
                             SSL1Simulation.ports[zone][numeroCase] = Integer.parseInt(reping[3]);
                             SSL1Simulation.adresses[zone][numeroCase] = InetAddress.getByName(reping[4]);
+                            System.out.println("Envoyer un message au noeud trouvé");
                         }
                     }else{
                         System.out.println("Ce n'est pas la bonne personne qui a répondu");
-                    }
+                    }*/
                     socket.close();
                     check = true;
                 }
                 
                 check = false;
             }
-        }catch(SocketTimeoutException e){
-            System.out.println("Timeout");
+        }catch(NullPointerException e){
+            System.out.println(ANSI_RED + "Pas de réponse de la part du noeud contacté" + ANSI_RESET);
+        }
+        catch(SocketTimeoutException e){
+            System.out.println(ANSI_RED + "Timeout" + ANSI_RESET);
         }
         catch(ConnectException e){
-            System.out.println("Noeud indisponible");
+            System.out.println(ANSI_RED + "Noeud indisponible" + ANSI_RESET);
         }
         catch (IOException e)
         {

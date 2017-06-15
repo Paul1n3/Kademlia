@@ -106,11 +106,14 @@ public class Init_Reseau {
                             }
                             socket.close();
                         }
+                        catch(NullPointerException e){
+                            System.out.println(ANSI_RED + "Pas de réponse de la part du noeud contacté" + ANSI_RESET);
+                        }
                         catch(SocketTimeoutException e){
-                            System.out.println(ANSI_GREEN + "Timeout" + ANSI_RESET);
+                            System.out.println(ANSI_RED + "Timeout" + ANSI_RESET);
                         }
                         catch(ConnectException e){
-                            System.out.println("Noeud indisponible");
+                            System.out.println(ANSI_RED + "Noeud indisponible" + ANSI_RESET);
                         }
                         catch (IOException e)
                         {
