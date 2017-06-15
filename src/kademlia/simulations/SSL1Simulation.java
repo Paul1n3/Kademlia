@@ -68,6 +68,7 @@ public class SSL1Simulation {
         double peutFonctionner = 0.0;
         double ancienPeutFonctionner;
         int tempsPause = 20000;
+        boolean ouverture = false;
 
         String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro"};
         
@@ -103,16 +104,22 @@ public class SSL1Simulation {
                             afficheTab(ports);
 
                             Decouverte_Noeuds.discovery(certificatsPublics, ports, adresses, port, adresse, numeroNoeudLance);
+                            ouverture = true;
+                        }else{
+                            System.out.println("La socket n'a pas été fermée");
+                            ouverture = false;
                         }
-                        if(!estFermee){
-                            //Operation_Reseau.rafraichissement(numeroNoeudLance, certificatsPublics, port, adresse);
-                        }
+                    }else{
+                        ouverture = false;
+                    }
+                    if(ouverture == false){
+                        Operation_reseau.rafraichissement(certificatsPublics, port, adresse, numeroNoeudLance);
                     }
                     //Faire envois de messages random
                     System.out.println("Envoi de messages aux autres noeuds");
                 }else{
                     enFonctionnement = false;
-                    System.out.println("Noeud en pause pour " + tempsPause + " secondes.");
+                    System.out.println("Noeud en pause pour " + tempsPause/1000 + " secondes.");
                 }
                 Thread.sleep(tempsPause);
                 estFermee = false;
@@ -207,15 +214,24 @@ class Accepter_clients implements Runnable {
             PrintWriter writer;
             writer = new PrintWriter(socket.getOutputStream(), true);
             writer.println("REPING:" + numeroNoeud);
-            System.out.println(ANSI_CYAN + "Un nouveau client s'est connecté !" + ANSI_RESET);
-
-            // Ajout aux tables de connaissance d'un noeud non connu
+            
             zone = SSL1Simulation.trouveZone(Integer.parseInt(message[1]));
             numero = SSL1Simulation.convertNumero(Integer.parseInt(message[1]), zone);
-            if(SSL1Simulation.ports[zone][numero]== 0 && SSL1Simulation.nombreNoeudZone(SSL1Simulation.ports, zone) < SSL1Simulation.k){
-                System.out.println(ANSI_CYAN + "J'ai reçu un ping d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
-                SSL1Simulation.ports[zone][numero] = Integer.parseInt(message[2]);
-                SSL1Simulation.adresses[zone][numero] = InetAddress.getByName(message[3]);
+            if(SSL1Simulation.ports[zone][numero] == 0){
+                System.out.println(ANSI_CYAN + "Un nouveau client s'est connecté !" + ANSI_RESET);
+
+                // Ajout aux tables de connaissance d'un noeud non connu
+                zone = SSL1Simulation.trouveZone(Integer.parseInt(message[1]));
+                numero = SSL1Simulation.convertNumero(Integer.parseInt(message[1]), zone);
+                if(SSL1Simulation.nombreNoeudZone(SSL1Simulation.ports, zone) < SSL1Simulation.k){
+                    System.out.println(ANSI_CYAN + "J'ai reçu un ping d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
+                    SSL1Simulation.ports[zone][numero] = Integer.parseInt(message[2]);
+                    SSL1Simulation.adresses[zone][numero] = InetAddress.getByName(message[3]);
+                }else{
+                    System.out.println("Je vérifie que les autres noeuds sont vivants");
+                }
+            }else{
+                System.out.println("Le noeud " + message[1] + " vérifie que je suis dans le réseau");
             }
         }
         

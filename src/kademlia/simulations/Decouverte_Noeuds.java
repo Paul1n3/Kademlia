@@ -59,7 +59,7 @@ public class Decouverte_Noeuds {
                         InputStream targetStream = new FileInputStream(initialFile);
                         System.out.println(ANSI_BLUE + "Tentative d'envoi de decouverte de nouveaux noeuds au noeud " + numeroNoeud + ANSI_RESET);
                         socket = SSLSocketKeystoreFactory.getSocketWithCert(adresses[i][j], ports[i][j], targetStream, certificatsPublics[numeroNoeud]);
-                        System.out.println(ANSI_GREEN + "Connection établie avec le noeud " + i + ANSI_RESET);
+                        System.out.println(ANSI_GREEN + "Connection établie avec le noeud " + numeroNoeud + ANSI_RESET);
 
                         // Envoi du message DISCOVER
                         PrintWriter writer;
@@ -111,7 +111,7 @@ public class Decouverte_Noeuds {
                                                 SSL1Simulation.adresses[zone][numero] = address;
                                             }
                                             else{
-                                                System.out.println(ANSI_BLUE + "Je le connais déjà" + ANSI_RESET);
+                                                System.out.println(ANSI_BLUE + "Je le connais déjà ou ma table est pleine" + ANSI_RESET);
                                             }
                                         }
                                     }

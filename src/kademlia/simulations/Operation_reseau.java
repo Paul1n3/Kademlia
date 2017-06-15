@@ -39,101 +39,70 @@ public class Operation_reseau {
     public static BufferedReader reader;
     public static SSLSocket socket;
         
-    public static void discovery(String [] certificatsPublics, int [] ports, InetAddress [] adresses, int port, InetAddress adresse, int noMonNoeud) throws IOException, UnknownHostException,
+    public static void rafraichissement(String [] certificatsPublics, int port, InetAddress adresse, int noMonNoeud) throws IOException, UnknownHostException,
             KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, InterruptedException {
         
+        int numero;
+        int zone;
+        int numeroTab;
+        boolean check = false;
         
         try
         {
-            // On parcours les noeuds qu'on connait dans le réseau pour leur demander de nous
-            // aider dans la découverte du réseau
-            for(int i = 0; i < ports.length; i++){
-                if(ports[i] != 0 && i != noMonNoeud){
-                    
-                    // Tentative de connexion au noeud de manière sécurisée
-                    File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat" + i);
-                    InputStream targetStream = new FileInputStream(initialFile);
-                    System.out.println(ANSI_BLUE + "Tentative d'envoi de decouverte de nouveaux noeuds au noeud " + i + ANSI_RESET);
-                    socket = SSLSocketKeystoreFactory.getSocketWithCert(adresses[i], ports[i], targetStream, certificatsPublics[i]);
-                    System.out.println(ANSI_GREEN + "Connection établie avec le noeud " + i + ANSI_RESET);
-                    
-                    // Envoi du message DISCOVER
-                    PrintWriter writer;
-                    writer = new PrintWriter(socket.getOutputStream(), true);
-                    writer.println("DISCOVER:" + noMonNoeud + ":" + port + ":" + "127.0.0.1");
-                    
-                    
-                    
-                    Thread thread;
-                    thread = new Thread(new Runnable(){
-                        @Override
-                        public void run(){
+            // Dans chaque zone, on PING un noeud
+            for(int i = 0; i < 4; i++){
+                for(int j = 0; j < 10; j++){
+                    numero = i * 10 + j;
+                    if(SSL1Simulation.ports[i][j] != 0 && numero != noMonNoeud && check == false){
+
+                        // Tentative de connexion au noeud de manière sécurisée
+                        File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat" + numero);
+                        InputStream targetStream = new FileInputStream(initialFile);
+                        System.out.println(ANSI_BLUE + "Tentative d'envoi de rafraichissement au noeud " + numero + ANSI_RESET);
+                        socket = SSLSocketKeystoreFactory.getSocketWithCert(SSL1Simulation.adresses[i][j], SSL1Simulation.ports[i][j], targetStream, certificatsPublics[numero]);
+                        System.out.println(ANSI_GREEN + "Connection établie avec le noeud " + numero + ANSI_RESET);
+
+                        // Envoi du message DISCOVER
+                        PrintWriter writer;
+                        writer = new PrintWriter(socket.getOutputStream(), true);
+                        writer.println("PING:" + noMonNoeud + ":" + port + ":" + "127.0.0.1");
+
+
+
                         
-                            try
-                            {
-                                // Réceptiond de la réponse du DISCOVER
-                                socket.setSoTimeout(20000);
-                                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                                String reponse = reader.readLine();
-                                System.out.println(ANSI_GREEN + reponse + ANSI_RESET);
+                        // Réception de la réponse du PING
+                        socket.setSoTimeout(20000);
+                        reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                        String reponse = reader.readLine();
+                        System.out.println(ANSI_GREEN + reponse + ANSI_RESET);
 
-                                //Traitement de la réponse  
 
-                                int compteur = 0;
-                                int numeroNoeud;
-                                int numeroPort;
-                                InetAddress address;
-                                String delims = "[:]";
-                                String[] nouveautes = reponse.split(delims);
-                                if(!reponse.equals("")){
-                                    while(compteur < nouveautes.length){
-                                        numeroNoeud = Integer.parseInt(nouveautes[compteur]);
-                                        System.out.println(ANSI_BLUE + "Infos sur le noeud " + numeroNoeud + ANSI_RESET);
-                                        compteur++;
-                                        numeroPort = Integer.parseInt(nouveautes[compteur]);
-                                        System.out.println(ANSI_BLUE + "Son numéro de port est " + numeroPort + ANSI_RESET);
-                                        compteur++;
-                                        address = InetAddress.getByName(nouveautes[compteur]);
-                                        System.out.println(ANSI_BLUE + "Son adresse IP est " + address + ANSI_RESET);
-                                        compteur++;
-
-                                        // Si on ne connaît pas le noeud, on le rajoute dans notre connaissance du réseau
-                                        /*if(SSL1Simulation.ports[numeroNoeud]== 0){
-                                            System.out.println(ANSI_BLUE + "J'ai des nouveautés sur le noeud " + numeroNoeud + " : je le rajoute !" + ANSI_RESET);
-                                            SSL1Simulation.ports[numeroNoeud] = numeroPort;
-                                            SSL1Simulation.adresses[numeroNoeud] = address;
-                                        }else{
-                                            System.out.println(ANSI_BLUE + "Je le connais déjà" + ANSI_RESET);
-                                        }*/
-                                    }
-                                }
-                                socket.close();
-                            }catch(SocketTimeoutException e){
-                                System.out.println("Timeout");
-                            }
-                            catch(ConnectException e){
-                                System.out.println("Noeud indisponible");
-                            }
-                            catch (IOException e)
-                            {
-                                e.printStackTrace();
-                            }
+                        String delims = "[:]";
+                        String[] reping = reponse.split(delims);
+                        // On vérifie si le message renvoyé provient bien de la bonne personne
+                        if(reping[0].equals("REPING") && reping[1].equals(Integer.toString(numero))){
+                            System.out.println(ANSI_GREEN + "Le REPING vient bien de la bonne personne, c'est bon!" + ANSI_RESET);
+                        }else{
+                            zone = SSL1Simulation.trouveZone(numero);
+                            numeroTab = SSL1Simulation.convertNumero(numero, zone);
+                            SSL1Simulation.ports[zone][numeroTab] = SSL1Simulation.ports[i][j];
+                            SSL1Simulation.adresses[zone][numeroTab] = SSL1Simulation.adresses[i][j];
                         }
-                    });
-                    thread.start();
-                    thread.join();
+                        socket.close();
+                        check = true;
+                    }
                 }
+                check = false;
             }
-        }catch(ConnectException e){
+        }catch(SocketTimeoutException e){
+            System.out.println("Timeout");
+        }
+        catch(ConnectException e){
             System.out.println("Noeud indisponible");
         }
         catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            
-                
-        
+        {
+            e.printStackTrace();
+        }   
     } 
-    
 }
