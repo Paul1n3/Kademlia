@@ -12,6 +12,7 @@ import java.net.*;
 import javax.net.ssl.SSLServerSocket;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,6 +23,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.SSLSocket;
 
 
@@ -43,12 +46,14 @@ public class SSL1Simulation {
     public static boolean peutEtreFerme = false;
     public static boolean estFermee = false;
     public static int k = 1;
+    public static int port;
+    public static String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro"};
     
     public static void main(String[] args) throws IOException,
         KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException, UnknownHostException, InterruptedException{
         
         SSLServerSocket ssocket = null;
-        int port = Integer.parseInt(args[0]);
+        port = Integer.parseInt(args[0]);
 
         // Mot de passe de la clé privée
         String motDePasse = args[1];
@@ -70,7 +75,6 @@ public class SSL1Simulation {
         int tempsPause = 20000;
         boolean ouverture = false;
 
-        String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro"};
         
         while(true){
             try
@@ -114,9 +118,11 @@ public class SSL1Simulation {
                     }
                     if(ouverture == false){
                         Operation_reseau.rafraichissement(certificatsPublics, port, adresse, numeroNoeudLance);
+                        System.out.println("Envoi de messages aux autres noeuds");
+                        
+                    }else{
+                        System.out.println("Pas d'opération à l'ouverture de la connexion");
                     }
-                    //Faire envois de messages random
-                    System.out.println("Envoi de messages aux autres noeuds");
                 }else{
                     enFonctionnement = false;
                     System.out.println("Noeud en pause pour " + tempsPause/1000 + " secondes.");
@@ -180,9 +186,12 @@ class Accepter_clients implements Runnable {
     int compteur;
     int zone;
     int numero;
+    int numeroNoeudTrouve = -1;
     
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_GREEN = "\u001B[32m";
 
     public Accepter_clients(Socket s, int noeud){
         socket = s;
@@ -221,14 +230,22 @@ class Accepter_clients implements Runnable {
                 System.out.println(ANSI_CYAN + "Un nouveau client s'est connecté !" + ANSI_RESET);
 
                 // Ajout aux tables de connaissance d'un noeud non connu
-                zone = SSL1Simulation.trouveZone(Integer.parseInt(message[1]));
-                numero = SSL1Simulation.convertNumero(Integer.parseInt(message[1]), zone);
                 if(SSL1Simulation.nombreNoeudZone(SSL1Simulation.ports, zone) < SSL1Simulation.k){
                     System.out.println(ANSI_CYAN + "J'ai reçu un ping d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
                     SSL1Simulation.ports[zone][numero] = Integer.parseInt(message[2]);
                     SSL1Simulation.adresses[zone][numero] = InetAddress.getByName(message[3]);
                 }else{
-                    System.out.println("Je vérifie que les autres noeuds sont vivants");
+                    System.out.println("Je vérifie qu'un autre noeud est vivant");
+                    boolean trouve = false;
+                    for(int j = 0; j < 10; j++){
+                        numeroNoeudTrouve = zone*10 + j;
+                        if(SSL1Simulation.ports[zone][j] != 0 && numero != numeroNoeud && trouve == false){
+                            System.out.println("Envoi du ping à " + numeroNoeudTrouve);
+                            envoiPing(numeroNoeudTrouve, socket, numeroNoeud, Integer.parseInt(message[2]), InetAddress.getByName(message[3]), Integer.parseInt(message[1]));
+
+                            trouve = true;
+                        }
+                    }
                 }
             }else{
                 System.out.println("Le noeud " + message[1] + " vérifie que je suis dans le réseau");
@@ -240,10 +257,27 @@ class Accepter_clients implements Runnable {
             // Ajout aux tables de connaissance d'un noeud non connu
             zone = SSL1Simulation.trouveZone(Integer.parseInt(message[1]));
             numero = SSL1Simulation.convertNumero(Integer.parseInt(message[1]), zone);
-            if(SSL1Simulation.ports[zone][numero]== 0 && SSL1Simulation.nombreNoeudZone(SSL1Simulation.ports, zone) < SSL1Simulation.k){
-                System.out.println(ANSI_CYAN + "J'ai reçu un discover d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
-                SSL1Simulation.ports[zone][numero] = Integer.parseInt(message[2]);
-                SSL1Simulation.adresses[zone][numero] = InetAddress.getByName(message[3]);
+            if(SSL1Simulation.ports[zone][numero] == 0){
+                System.out.println(ANSI_CYAN + "Un nouveau client s'est connecté ! Je viens de recevoir de lui un DISCOVER" + ANSI_RESET);
+
+                // Ajout aux tables de connaissance d'un noeud non connu
+                if(SSL1Simulation.nombreNoeudZone(SSL1Simulation.ports, zone) < SSL1Simulation.k){
+                    System.out.println(ANSI_CYAN + "J'ai reçu un DISCOVER d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
+                    SSL1Simulation.ports[zone][numero] = Integer.parseInt(message[2]);
+                    SSL1Simulation.adresses[zone][numero] = InetAddress.getByName(message[3]);
+                }else{
+                    System.out.println("Je vérifie qu'un autre noeud est vivant");
+                    boolean trouve = false;
+                    for(int j = 0; j < 10; j++){
+                        numeroNoeudTrouve = zone*10 + j;
+                        if(SSL1Simulation.ports[zone][j] != 0 && numero != numeroNoeud && trouve == false){
+                            System.out.println("Envoi du ping à " + numeroNoeudTrouve);
+                            envoiPing(numeroNoeudTrouve, socket, numeroNoeud, Integer.parseInt(message[2]), InetAddress.getByName(message[3]), Integer.parseInt(message[1]));
+
+                            trouve = true;
+                        }
+                    }
+                }
             }
 
             //Envoi des noeuds connus par le serveur sous forme noNoeud:Port:Adresse
@@ -285,10 +319,86 @@ class Accepter_clients implements Runnable {
         SSL1Simulation.compteur++;
         
         socket.close();
-    } catch (IOException e) {
+    }catch (FileNotFoundException ex) {
+        Logger.getLogger(Accepter_clients.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (NoSuchAlgorithmException ex) {
+        Logger.getLogger(Accepter_clients.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (CertificateException ex) {
+        Logger.getLogger(Accepter_clients.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (KeyStoreException ex) {
+        Logger.getLogger(Accepter_clients.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    catch (KeyManagementException e) {
         e.printStackTrace();
     }
-  }
+    catch(ConnectException e){
+        System.out.println("Noeud indisponible");
+    }
+    catch (IOException e) {
+        e.printStackTrace();
+    }   
+    }
+    
+    public static void envoiPing(int numeroNoeud, Socket socket, int monNoeud, int addPort, InetAddress addAddr, int addNumero) throws FileNotFoundException, KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException{
+        String reponse;
+        BufferedReader reader;
+        int zone;
+        int numero;
+        Socket nouvelleConnexion;
+        
+        try{
+            zone = SSL1Simulation.trouveZone(numeroNoeud);
+            numero = SSL1Simulation.convertNumero(numeroNoeud, zone);
+            File initialFile = new File("/Users/Pauline/Desktop/Kademlia/src/kademlia/certificat" + numeroNoeud);
+            InputStream targetStream = new FileInputStream(initialFile);
+            System.out.println(ANSI_BLUE + "Tentative d'envoi de ping pour voir s'il est toujours vivant au noeud " + numeroNoeud + ANSI_RESET);
+            socket = SSLSocketKeystoreFactory.getSocketWithCert(SSL1Simulation.adresses[zone][numero], SSL1Simulation.ports[zone][numero], targetStream, SSL1Simulation.certificatsPublics[numeroNoeud]);
+            System.out.println(ANSI_GREEN + "Connection établie avec le noeud " + numeroNoeud + ANSI_RESET);
+
+            
+            // Envoi d'un PING au nouveau noeud connu pour vérifier son existance
+            PrintWriter writer;
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            writer.println("PING:" + monNoeud + ":" + SSL1Simulation.port + ":" + "127.0.0.1");
+
+            socket.setSoTimeout(20000);
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            reponse = reader.readLine();
+            System.out.println(ANSI_BLUE + reponse + ANSI_RESET);
+
+            String delims = "[:]";
+            String[] reping = reponse.split(delims);
+            // On vérifie si le message renvoyé provient bien de la bonne personne
+            if(reping[0].equals("REPING") && reping[1].equals(Integer.toString(numeroNoeud))){
+                System.out.println(ANSI_GREEN + "Le REPING vient bien de la bonne personne, je le garde" + ANSI_RESET);
+            }else{
+                System.out.println("Le noeud n'est plus dans le réseau, je l'enlève de la table de routage");
+                SSL1Simulation.ports[zone][numeroNoeud] = 0;
+                System.out.println("Je rajoute le nouveau noeud");
+                zone = SSL1Simulation.trouveZone(addNumero);
+                numero = SSL1Simulation.convertNumero(addNumero, zone);
+                SSL1Simulation.ports[zone][numero] = addPort;
+                SSL1Simulation.adresses[zone][numero] = addAddr;
+            }
+            socket.close();
+        }catch(ConnectException e){
+            zone = SSL1Simulation.trouveZone(numeroNoeud);
+            numero = SSL1Simulation.convertNumero(numeroNoeud, zone);
+            System.out.println("Noeud indisponible");
+            System.out.println("Le noeud " + numeroNoeud + "n'est plus dans le réseau, je l'enlève de la table de routage");
+            SSL1Simulation.ports[zone][numeroNoeud] = 0;
+            System.out.println("Je rajoute le nouveau noeud " + addNumero);
+            zone = SSL1Simulation.trouveZone(addNumero);
+            numero = SSL1Simulation.convertNumero(addNumero, zone);
+            SSL1Simulation.ports[zone][numero] = addPort;
+            SSL1Simulation.adresses[zone][numero] = addAddr;
+        }
+        catch (IOException e) {
+        e.printStackTrace();
+        }
+    }
+  
+  
 
 }
 
