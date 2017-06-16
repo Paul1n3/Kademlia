@@ -46,9 +46,9 @@ public class SSL1Simulation {
     public static boolean enFonctionnement = true;
     public static boolean peutEtreFerme = false;
     public static boolean estFermee = false;
-    public static int k = 3;
+    public static int k = 1;
     public static int port;
-    public static String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro"};
+    public static String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro", "fruit", "compote", "trompette", "barrette", "etincelle", "framboise", "cassis", "creme", "chocolat", "praline", "pepites", "orange", "citron", "epices", "boisson", "pate", "mais", "poire", "marteau", "ciseaux", "caillou", "montre", "lentilles", "souris", "buisson", "ordinateur", "discussion", "neige", "sable", "lune", "nuit", "shampooing", "trophee", "tennis", "judo"};
     
     public static void main(String[] args) throws IOException,
         KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableKeyException, UnknownHostException, InterruptedException{
@@ -185,7 +185,7 @@ public class SSL1Simulation {
     
     public static int nombreNoeudZone(int [][] tab, int zone){
         int compteur = 0;
-        for(int i = 0; i < tab.length; i++){
+        for(int i = 0; i < tab[zone].length; i++){
             if(tab[zone][i] != 0){
                 compteur++;
             }
@@ -247,7 +247,9 @@ class Accepter_clients implements Runnable {
             numero = SSL1Simulation.convertNumero(Integer.parseInt(message[1]), zone);
             if(SSL1Simulation.ports[zone][numero] == 0){
                 System.out.println(ANSI_CYAN + "Un nouveau client s'est connecté !" + ANSI_RESET);
-
+                
+                System.out.println("Il y a " + SSL1Simulation.nombreNoeudZone(SSL1Simulation.ports, zone) + " noeuds dans cette zone");
+                System.out.println("Il faut au maximum " + SSL1Simulation.k + " noeuds dans cette zone");
                 // Ajout aux tables de connaissance d'un noeud non connu
                 if(SSL1Simulation.nombreNoeudZone(SSL1Simulation.ports, zone) < SSL1Simulation.k){
                     System.out.println(ANSI_CYAN + "J'ai reçu un ping d'un noeud inconnu: je le rajoute !" + ANSI_RESET);
@@ -415,7 +417,7 @@ class Accepter_clients implements Runnable {
             }else{
                 System.out.println(ANSI_RED + "Le noeud n'est plus dans le réseau, je l'enlève de la table de routage" + ANSI_RESET);
                 SSL1Simulation.ports[zone][numeroNoeud] = 0;
-                System.out.println(ANSI_CYAN + "Je rajoute le nouveau noeud" + ANSI_RESET);
+                System.out.println(ANSI_CYAN + "Je rajoute le nouveau noeud " + ANSI_RESET);
                 zone = SSL1Simulation.trouveZone(addNumero);
                 numero = SSL1Simulation.convertNumero(addNumero, zone);
                 SSL1Simulation.ports[zone][numero] = addPort;
@@ -426,9 +428,9 @@ class Accepter_clients implements Runnable {
             zone = SSL1Simulation.trouveZone(numeroNoeud);
             numero = SSL1Simulation.convertNumero(numeroNoeud, zone);
             System.out.println("Noeud indisponible");
-            System.out.println("Le noeud " + numeroNoeud + "n'est plus dans le réseau, je l'enlève de la table de routage");
-            SSL1Simulation.ports[zone][numeroNoeud] = 0;
-            System.out.println("Je rajoute le nouveau noeud " + addNumero);
+            System.out.println(ANSI_RED + "Le noeud " + numeroNoeud + " n'est plus dans le réseau, je l'enlève de la table de routage" + ANSI_RESET);
+            SSL1Simulation.ports[zone][numero] = 0;
+            System.out.println(ANSI_CYAN + "Je rajoute le nouveau noeud " + addNumero + ANSI_RESET);
             zone = SSL1Simulation.trouveZone(addNumero);
             numero = SSL1Simulation.convertNumero(addNumero, zone);
             SSL1Simulation.ports[zone][numero] = addPort;

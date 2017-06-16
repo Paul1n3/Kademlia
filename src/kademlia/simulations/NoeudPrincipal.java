@@ -40,7 +40,7 @@ public class NoeudPrincipal {
         // Mot de passe de la clé privée
         String motDePasse = "gateau";
         int numeroNoeudLance = 0;
-        String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro"};
+        String certificatsPublics [] = {"biscuit", "volant", "ciment", "arcenciel", "micro", "fruit", "compote", "trompette", "barrette", "etincelle", "framboise", "cassis", "creme", "chocolat", "praline", "pepites", "orange", "citron", "epices", "boisson", "pate", "mais", "poire", "marteau", "ciseaux", "caillou", "montre", "lentilles", "souris", "buisson", "ordinateur", "discussion", "neige", "sable", "lune", "nuit", "shampooing", "trophee", "tennis", "judo"};
         
         try
         {

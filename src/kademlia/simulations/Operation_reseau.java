@@ -150,17 +150,17 @@ public class Operation_reseau {
                     if(reping[0].equals("RELOOKUP") && reping[1].equals(Integer.toString(numeroAContacter))){
                         System.out.println(ANSI_GREEN + "Le REPING vient bien de la bonne personne, c'est bon!" + ANSI_RESET);
                         if(reping[2].equals(Integer.toString(numeroATrouver))){
-                            System.out.println("Le noeud a été trouvé! Je l'ajoute dans ma table de routage");
+                            System.out.println(ANSI_GREEN + "Le noeud a été trouvé! Je l'ajoute dans ma table de routage" + ANSI_RESET);
                             SSL1Simulation.ports[zone][numeroCase] = Integer.parseInt(reping[3]);
                             SSL1Simulation.adresses[zone][numeroCase] = InetAddress.getByName(reping[4]);
-                            System.out.println("Envoyer un message au noeud trouvé");
+                            System.out.println(ANSI_GREEN + "Envoyer un message au noeud trouvé" + ANSI_RESET);
                         }
                     }
                     else if(reping[0].equals("NOTFOUND") && reping[1].equals(Integer.toString(numeroAContacter))){
-                        System.out.println("Le noeud " + numeroAContacter + " ne connait pas le noeud que je veux contacter.");
+                        System.out.println(ANSI_BLUE + "Le noeud " + numeroAContacter + " ne connait pas le noeud que je veux contacter." + ANSI_RESET);
                     }
                     else{
-                        System.out.println("Ce n'est pas la bonne personne qui a répondu");
+                        System.out.println(ANSI_RED + "Ce n'est pas la bonne personne qui a répondu" + ANSI_RESET);
                     }
                     socket.close();
                     check = true;
