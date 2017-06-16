@@ -75,7 +75,7 @@ public class SSL1Simulation {
         double ancienPeutFonctionner;
         int tempsPause = 20000;
         boolean ouverture = false;
-        int max = 5;
+        int max = 40;
         int zone;
         int numeroCase;
 
