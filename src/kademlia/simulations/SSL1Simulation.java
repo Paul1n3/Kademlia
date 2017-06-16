@@ -83,8 +83,6 @@ public class SSL1Simulation {
         while(true){
             try
             {
-                System.out.println();
-                System.out.println();
                 ancienPeutFonctionner = peutFonctionner;
                 peutFonctionner = Math.random();
                 if(peutFonctionner >= 0.5){
@@ -146,6 +144,8 @@ public class SSL1Simulation {
                 }
                 Thread.sleep(tempsPause);
                 estFermee = false;
+                System.out.println();
+                System.out.println();
 
             }
             catch (IOException e)
